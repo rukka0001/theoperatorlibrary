@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listProducts, formatCLP } from '../../config/products';
+
+const products = listProducts();
+---
+
+<BaseLayout
+  title="The Operator Library — Catálogo"
+  description="Libros directos para operadores. Sin relleno, aplicables desde el primer día."
+>
+  <section class="mx-auto max-w-5xl px-6 py-20">
+    <p class="text-sm font-medium tracking-widest text-amber-400 uppercase">
+      Biblioteca
+    </p>
+    <h1 class="mt-3 max-w-2xl text-4xl font-semibold text-stone-50 sm:text-5xl">
+      Libros para operadores que quieren resultados, no teoría.
+    </h1>
+    <p class="mt-5 max-w-xl text-lg text-stone-400">
+      Material directo y aplicable. Compra una vez, descarga al instante.
+    </p>
+
+    <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        products.map((product) => (
+          <a
+            href={`/es/${product.slug}`}
+            class="group flex flex-col overflow-hidden rounded-2xl border border-stone-800 bg-stone-900/50 transition hover:border-amber-400/50 hover:bg-stone-900"
+          >
+            <div class="aspect-[2/3] overflow-hidden bg-stone-800">
+              <img
+                src={product.coverImage}
+                alt={`Portada de ${product.title}`}
+                class="h-full w-full object-cover transition group-hover:scale-[1.02]"
+              />
+            </div>
+            <div class="flex flex-1 flex-col p-5">
+              <span class="text-xs font-medium tracking-wide text-amber-400/80">
+                Ebook + 4 bonos
+              </span>
+              <h2 class="mt-1 text-lg font-semibold text-stone-100">
+                {product.title}
+              </h2>
+              <p class="mt-1 flex-1 text-sm text-stone-400 line-clamp-3">
+                {product.subtitle}
+              </p>
+              <div class="mt-4 flex items-baseline gap-2">
+                {product.regularPriceCLP && (
+                  <span class="text-sm text-stone-600 line-through">
+                    {formatCLP(product.regularPriceCLP)}
+                  </span>
+                )}
+                <span class="text-base font-semibold text-amber-300">
+                  {formatCLP(product.priceCLP)}
+                </span>
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

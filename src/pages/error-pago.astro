@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Hubo un problema con el pago — The Operator Library"
+  description="No pudimos procesar tu pago."
+>
+  <section class="mx-auto max-w-xl px-6 py-24 text-center">
+    <div
+      class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-500/15 text-2xl text-red-400"
+      aria-hidden="true"
+    >
+      !
+    </div>
+    <h1 class="mt-6 text-3xl font-semibold text-stone-50">No se completó el pago</h1>
+    <p class="mt-4 text-lg text-stone-400">
+      Tu pago no pudo procesarse o fue cancelado. No se realizó ningún cargo.
+      Puedes intentarlo nuevamente cuando quieras.
+    </p>
+    <div class="mt-10 flex flex-wrap justify-center gap-3">
+      <a
+        href="/es"
+        class="rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
+      >
+        Volver a intentar
+      </a>
+      <a
+        href="/legal/terms"
+        class="rounded-lg border border-stone-700 px-5 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/60 hover:text-amber-300"
+      >
+        Necesito ayuda
+      </a>
+    </div>
+  </section>
+</BaseLayout>

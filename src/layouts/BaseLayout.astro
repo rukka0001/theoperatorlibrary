@@ -1,0 +1,79 @@
+---
+// Site-wide base layout. Importing global.css here makes Tailwind available
+// to every page that uses this layout.
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'The Operator Library — libros para operadores.' } =
+  Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body
+    class="min-h-full bg-stone-950 text-stone-200 antialiased selection:bg-amber-400/30"
+  >
+    <div class="flex min-h-screen flex-col">
+      <header class="border-b border-stone-800/80">
+        <nav
+          class="mx-auto flex max-w-5xl items-center justify-between px-6 py-5"
+        >
+          <a
+            href="/es"
+            class="text-sm font-semibold tracking-widest text-stone-100 uppercase"
+          >
+            The Operator Library
+          </a>
+          <a
+            href="/es"
+            class="text-sm text-stone-400 transition hover:text-amber-300"
+          >
+            Catálogo
+          </a>
+        </nav>
+      </header>
+
+      <main class="flex-1">
+        <slot />
+      </main>
+
+      <footer class="border-t border-stone-800/80">
+        <div
+          class="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-8 text-sm text-stone-500 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p>© {new Date().getFullYear()} The Operator Library</p>
+          <ul class="flex flex-wrap gap-x-5 gap-y-2">
+            <li>
+              <a href="/legal/disclaimer" class="transition hover:text-stone-300"
+                >Aviso legal</a
+              >
+            </li>
+            <li>
+              <a href="/legal/privacy" class="transition hover:text-stone-300"
+                >Privacidad</a
+              >
+            </li>
+            <li>
+              <a href="/legal/terms" class="transition hover:text-stone-300"
+                >Términos</a
+              >
+            </li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
