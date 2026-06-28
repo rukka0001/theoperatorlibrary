@@ -4,7 +4,7 @@ import { getEnv } from '../../../lib/env';
 import { getPaymentStatus, FLOW_STATUS } from '../../../lib/flow';
 import {
   createDownloadToken,
-  getDownloadTtlHours
+  getDownloadTtlDays
 } from '../../../lib/download-token';
 import { sendDownloadEmail } from '../../../lib/email';
 
@@ -22,10 +22,19 @@ export const prerender = false;
  * On a paid order we mint a signed download link and email it to the buyer
  * via Resend.
  *
- * Idempotency: Flow may call more than once for the same order. Minting a
- * download token is idempotent; a retry may send a duplicate email, which is
- * acceptable for delivery reliability.
+ * Idempotency: Flow may call this URL more than once for the same order (and
+ * the buyer's browser return can race the server callback). We remember the
+ * commerceOrders we've already fulfilled in this process so a duplicate
+ * confirmation during the SAME runtime won't send a second email.
+ *
+ * TODO(durable-idempotency): this guard is per-process only. Vercel serverless
+ * instances are ephemeral and not shared, so a retry that lands on a cold/other
+ * instance can still double-send. Replace `fulfilledOrders` with a durable,
+ * atomic "claim" in a DB/KV (e.g. Vercel KV / Postgres) keyed by commerceOrder
+ * — insert-if-absent before sending, so exactly one caller ever delivers.
  */
+const fulfilledOrders = new Set<string>();
+
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData().catch(() => null);
   const token = form?.get('token')?.toString();
@@ -58,6 +67,17 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response('OK', { status: 200 });
     }
 
+    // Best-effort idempotency: skip if we've already delivered this order in
+    // this process. Claim the order BEFORE sending so two near-simultaneous
+    // confirmations in the same runtime can't both pass the check.
+    if (fulfilledOrders.has(payment.commerceOrder)) {
+      console.log(
+        `[webhooks/flow] order ${payment.commerceOrder} already fulfilled this runtime — skipping resend`
+      );
+      return new Response('OK', { status: 200 });
+    }
+    fulfilledOrders.add(payment.commerceOrder);
+
     const downloadToken = await createDownloadToken({
       slug: product.slug,
       email
@@ -65,12 +85,19 @@ export const POST: APIRoute = async ({ request }) => {
     const siteUrl = getEnv('PUBLIC_SITE_URL') ?? new URL(request.url).origin;
     const downloadUrl = `${siteUrl}/api/download?token=${downloadToken}`;
 
-    await sendDownloadEmail({
-      to: email,
-      product,
-      downloadUrl,
-      ttlHours: getDownloadTtlHours()
-    });
+    try {
+      await sendDownloadEmail({
+        to: email,
+        product,
+        downloadUrl,
+        ttlDays: getDownloadTtlDays()
+      });
+    } catch (sendError) {
+      // Delivery failed — release the claim so a Flow retry (we return 500
+      // below) can attempt to deliver again instead of silently skipping.
+      fulfilledOrders.delete(payment.commerceOrder);
+      throw sendError;
+    }
 
     console.log('[webhooks/flow] fulfilled paid order', {
       commerceOrder: payment.commerceOrder,

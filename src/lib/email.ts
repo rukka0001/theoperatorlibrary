@@ -63,8 +63,8 @@ export interface DownloadEmailInput {
   product: Product;
   /** Base signed link to /api/download (token only); a `file` id is appended per file. */
   downloadUrl: string;
-  /** How long the link is valid, in hours (for the copy). */
-  ttlHours: number;
+  /** How long the link is valid, in days (for the copy). */
+  ttlDays: number;
 }
 
 /** Build the per-file download URL from the base (token) URL. */
@@ -90,7 +90,7 @@ export async function sendDownloadEmail(
   });
 }
 
-function renderText({ product, downloadUrl, ttlHours }: DownloadEmailInput): string {
+function renderText({ product, downloadUrl, ttlDays }: DownloadEmailInput): string {
   const files = product.files
     .map((f) => `- ${f.label}: ${fileUrl(downloadUrl, f.id)}`)
     .join('\n');
@@ -102,14 +102,14 @@ function renderText({ product, downloadUrl, ttlHours }: DownloadEmailInput): str
     ``,
     files,
     ``,
-    `(Estos enlaces son personales y vencen en ${ttlHours} horas.)`,
+    `(Estos enlaces son personales y vencen en ${ttlDays} días.)`,
     ``,
     `Solo para fines educativos. No es asesoramiento financiero.`,
     `The Operator Library`
   ].join('\n');
 }
 
-function renderHtml({ product, downloadUrl, ttlHours }: DownloadEmailInput): string {
+function renderHtml({ product, downloadUrl, ttlDays }: DownloadEmailInput): string {
   const rows = product.files
     .map(
       (f) => `
@@ -119,7 +119,7 @@ function renderHtml({ product, downloadUrl, ttlHours }: DownloadEmailInput): str
           </td>
           <td align="right" style="padding:10px 0;border-bottom:1px solid #f0eeec;">
             <a href="${fileUrl(downloadUrl, f.id)}" style="display:inline-block;background:#f59e0b;color:#0c0a09;font-weight:700;font-size:13px;text-decoration:none;padding:8px 18px;border-radius:8px;white-space:nowrap;">
-              Descargar
+              ${escapeHtml(f.ctaLabel)}
             </a>
           </td>
         </tr>`
@@ -152,7 +152,7 @@ function renderHtml({ product, downloadUrl, ttlHours }: DownloadEmailInput): str
                 <p style="margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#78716c;">Tus archivos</p>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
                 <p style="margin:16px 0 0;font-size:13px;color:#a8a29e;">
-                  Estos enlaces son personales y vencen en ${ttlHours} horas.
+                  Estos enlaces son personales y vencen en ${ttlDays} días.
                 </p>
               </td>
             </tr>

@@ -24,12 +24,12 @@ function getSecret(): Uint8Array {
 }
 
 function getTtlSeconds(): number {
-  return Number(getEnv('DOWNLOAD_TOKEN_TTL') ?? 86400);
+  return Number(getEnv('DOWNLOAD_TOKEN_TTL') ?? 604800);
 }
 
-/** Token validity in whole hours, for user-facing copy. */
-export function getDownloadTtlHours(): number {
-  return Math.round(getTtlSeconds() / 3600);
+/** Token validity in whole days, for user-facing copy. */
+export function getDownloadTtlDays(): number {
+  return Math.round(getTtlSeconds() / 86400);
 }
 
 /** Create a signed, expiring download token for a product. */

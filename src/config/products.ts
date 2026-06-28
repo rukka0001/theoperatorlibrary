@@ -13,8 +13,10 @@
 export interface DownloadFile {
   /** URL-safe id used in /api/download?file=<id>. */
   id: string;
-  /** Button label shown in the delivery email. */
+  /** Row label shown beside the button in the delivery email. */
   label: string;
+  /** Download button text in the delivery email (e.g. "Descargar PDF"). */
+  ctaLabel: string;
   /** Filename presented to the buyer on download. */
   fileName: string;
   /** Pathname of the file inside Vercel Blob. Never exposed to the client. */
@@ -62,6 +64,7 @@ export const products: Record<string, Product> = {
       {
         id: 'pdf',
         label: 'Ebook principal (PDF)',
+        ctaLabel: 'Descargar PDF',
         fileName: 'El-Trader-Que-Perdia-Ganando.pdf',
         blobKey: `${BLOB_PREFIX}/el-trader-que-perdia-ganando.pdf`,
         contentType: 'application/pdf'
@@ -69,6 +72,7 @@ export const products: Record<string, Product> = {
       {
         id: 'epub',
         label: 'Versión EPUB',
+        ctaLabel: 'Descargar EPUB',
         fileName: 'El-Trader-Que-Perdia-Ganando.epub',
         blobKey: `${BLOB_PREFIX}/el-trader-que-perdia-ganando.epub`,
         contentType: 'application/epub+zip'
@@ -76,6 +80,7 @@ export const products: Record<string, Product> = {
       {
         id: 'azw3',
         label: 'Versión Kindle / AZW3',
+        ctaLabel: 'Descargar Kindle / AZW3',
         fileName: 'El-Trader-Que-Perdia-Ganando.azw3',
         blobKey: `${BLOB_PREFIX}/el-trader-que-perdia-ganando.azw3`,
         contentType: 'application/octet-stream'
@@ -83,6 +88,7 @@ export const products: Record<string, Product> = {
       {
         id: 'hojas',
         label: 'Hojas de referencia (4 incluidas)',
+        ctaLabel: 'Descargar hojas de referencia',
         fileName: 'Hojas-de-Referencia.pdf',
         blobKey: `${BLOB_PREFIX}/hojas-de-referencia.pdf`,
         contentType: 'application/pdf'
