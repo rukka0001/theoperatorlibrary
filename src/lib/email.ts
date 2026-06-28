@@ -18,6 +18,46 @@ function getClient(): Resend {
   return client;
 }
 
+export interface SendEmailInput {
+  /** Recipient address (or addresses). */
+  to: string | string[];
+  subject: string;
+  html: string;
+  /** Optional plaintext alternative (recommended for deliverability). */
+  text?: string;
+  /** Override the default sender. Defaults to RESEND_FROM_EMAIL. */
+  from?: string;
+  /** Optional reply-to address. */
+  replyTo?: string;
+}
+
+/**
+ * Reusable transactional email sender. Uses RESEND_FROM_EMAIL as the sender
+ * unless overridden. Throws on failure so callers can react (retry, 500, etc.).
+ *
+ * Returns the Resend message id on success.
+ */
+export async function sendEmail(input: SendEmailInput): Promise<string> {
+  const from = input.from ?? requireEnv('RESEND_FROM_EMAIL');
+
+  const { data, error } = await getClient().emails.send({
+    from,
+    to: input.to,
+    subject: input.subject,
+    html: input.html,
+    text: input.text,
+    replyTo: input.replyTo
+  });
+
+  if (error) {
+    throw new Error(
+      `Resend failed to send to ${Array.isArray(input.to) ? input.to.join(', ') : input.to}: ${error.message}`
+    );
+  }
+
+  return data?.id ?? '';
+}
+
 export interface DownloadEmailInput {
   to: string;
   product: Product;
@@ -41,19 +81,13 @@ export async function sendDownloadEmail(
   input: DownloadEmailInput
 ): Promise<void> {
   const { to, product } = input;
-  const from = requireEnv('RESEND_FROM_EMAIL');
 
-  const { error } = await getClient().emails.send({
-    from,
+  await sendEmail({
     to,
     subject: `Tu descarga: ${product.title}`,
     html: renderHtml(input),
     text: renderText(input)
   });
-
-  if (error) {
-    throw new Error(`Resend failed to send to ${to}: ${error.message}`);
-  }
 }
 
 function renderText({ product, downloadUrl, ttlHours }: DownloadEmailInput): string {

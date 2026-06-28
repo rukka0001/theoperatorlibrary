@@ -85,7 +85,7 @@ async function main(): Promise<void> {
       try {
         const body = await readFile(localPath);
         const result = await put(file.blobKey, body, {
-          access: 'public',
+          access: 'private',
           addRandomSuffix: false,
           contentType: file.contentType,
           token

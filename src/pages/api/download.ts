@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { list } from '@vercel/blob';
+import { get } from '@vercel/blob';
 import { getProduct } from '../../config/products';
 import { verifyDownloadToken } from '../../lib/download-token';
 import { requireEnv } from '../../lib/env';
@@ -44,20 +44,16 @@ export const GET: APIRoute = async ({ url }) => {
   try {
     const blobToken = requireEnv('BLOB_READ_WRITE_TOKEN');
 
-    // Resolve the blob's URL by its pathname (we never store the full URL).
-    const { blobs } = await list({
-      prefix: file.blobKey,
-      limit: 1,
+    // Fetch the private blob by pathname. `get` authenticates with the token
+    // and returns a stream, so the permanent Blob URL is never exposed and the
+    // store can stay private. (A 304 only happens with ifNoneMatch, which we
+    // don't send, so `stream` is always present on success.)
+    const result = await get(file.blobKey, {
+      access: 'private',
       token: blobToken
     });
-    const blob = blobs.find((b) => b.pathname === file.blobKey) ?? blobs[0];
-    if (!blob) {
+    if (!result || !result.stream) {
       return new Response('Archivo no disponible.', { status: 404 });
-    }
-
-    const upstream = await fetch(blob.downloadUrl ?? blob.url);
-    if (!upstream.ok || !upstream.body) {
-      return new Response('No se pudo obtener el archivo.', { status: 502 });
     }
 
     const headers = new Headers({
@@ -65,10 +61,11 @@ export const GET: APIRoute = async ({ url }) => {
       'content-disposition': `attachment; filename="${file.fileName}"`,
       'cache-control': 'private, no-store'
     });
-    const length = upstream.headers.get('content-length');
-    if (length) headers.set('content-length', length);
+    if (result.blob.size != null) {
+      headers.set('content-length', String(result.blob.size));
+    }
 
-    return new Response(upstream.body, { status: 200, headers });
+    return new Response(result.stream, { status: 200, headers });
   } catch (error) {
     console.error('[api/download] failed to stream file:', error);
     return new Response('Error al preparar la descarga.', { status: 500 });
