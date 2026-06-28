@@ -1,0 +1,38 @@
+---
+// Reusable checkout form: email capture + buy button, posting to Flow checkout.
+// Used in the hero and the final CTA.
+interface Props {
+  slug: string;
+  ctaLabel?: string;
+  /** Optional note rendered under the form. */
+  note?: string;
+  /** Extra classes for the <form> (e.g. spacing / centering). */
+  class?: string;
+}
+
+const { slug, ctaLabel = 'Comprar ahora', note, class: className } = Astro.props;
+---
+
+<form
+  method="POST"
+  action="/api/checkout/flow"
+  class:list={['max-w-md', className]}
+>
+  <input type="hidden" name="slug" value={slug} />
+  <div class="flex flex-col gap-3 sm:flex-row">
+    <input
+      type="email"
+      name="email"
+      required
+      placeholder="tucorreo@ejemplo.com"
+      class="w-full flex-1 rounded-lg border border-stone-700 bg-stone-950/80 px-4 py-3 text-stone-100 placeholder:text-stone-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none"
+    />
+    <button
+      type="submit"
+      class="rounded-lg bg-amber-400 px-6 py-3 font-semibold text-stone-950 transition hover:bg-amber-300"
+    >
+      {ctaLabel}
+    </button>
+  </div>
+  {note && <p class="mt-3 text-sm text-stone-400">{note}</p>}
+</form>

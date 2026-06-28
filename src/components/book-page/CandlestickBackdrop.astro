@@ -1,0 +1,58 @@
+---
+// Decorative candlestick backdrop for the hero. Deterministic, purely visual.
+const candles = Array.from({ length: 36 }, (_, i) => {
+  const x = i * 24 + 12;
+  const mid = 150 + Math.sin(i * 0.55) * 55 - i * 1.2;
+  const h = 16 + ((i * 37) % 46);
+  const wick = 12 + ((i * 13) % 26);
+  const up = (i * 7) % 3 !== 0;
+  return { x, y: mid - h / 2, h, wick, up };
+});
+---
+
+<div
+  class="pointer-events-none absolute inset-0 opacity-[0.18]"
+  aria-hidden="true"
+>
+  <svg
+    class="h-full w-full"
+    viewBox="0 0 840 300"
+    preserveAspectRatio="xMidYMid slice"
+  >
+    <defs>
+      <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff" stop-opacity="0.0" />
+        <stop offset="0.5" stop-color="#fff" stop-opacity="1" />
+        <stop offset="1" stop-color="#fff" stop-opacity="0.0" />
+      </linearGradient>
+      <mask id="fademask">
+        <rect width="840" height="300" fill="url(#fade)" />
+      </mask>
+    </defs>
+    <g mask="url(#fademask)" stroke-width="2">
+      {
+        candles.map((c) => {
+          const color = c.up ? '#34d399' : '#f87171';
+          return (
+            <g stroke={color} fill={color}>
+              <line
+                x1={c.x + 4}
+                y1={c.y - c.wick}
+                x2={c.x + 4}
+                y2={c.y + c.h + c.wick}
+              />
+              <rect
+                x={c.x}
+                y={c.y}
+                width="8"
+                height={c.h}
+                rx="1"
+                fill-opacity={c.up ? 0.55 : 0.4}
+              />
+            </g>
+          );
+        })
+      }
+    </g>
+  </svg>
+</div>

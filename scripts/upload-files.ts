@@ -7,8 +7,8 @@
  *
  * Local files are read from a source directory that MIRRORS the blob keys:
  *
- *   <source-dir>/books/el-trader-que-perdia-ganando/ebook.pdf
- *   <source-dir>/books/el-trader-que-perdia-ganando/ebook.epub
+ *   <source-dir>/books/el-trader-que-perdia-ganando/es/el-trader-que-perdia-ganando.pdf
+ *   <source-dir>/books/el-trader-que-perdia-ganando/es/hojas-de-referencia.pdf
  *   ...
  *
  * Usage:

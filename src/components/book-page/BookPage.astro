@@ -1,0 +1,489 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BuyForm from './BuyForm.astro';
+import CandlestickBackdrop from './CandlestickBackdrop.astro';
+import { formatCLP, type Product } from '../../config/products';
+import type { BookContent } from '../../content/books/types';
+
+interface Props {
+  product: Product;
+  content: BookContent;
+}
+
+const { product, content } = Astro.props;
+
+const discountPct = product.regularPriceCLP
+  ? Math.round((1 - product.priceCLP / product.regularPriceCLP) * 100)
+  : 0;
+
+const statValueClass: Record<string, string> = {
+  win: 'text-emerald-400',
+  loss: 'text-red-400',
+  neutral: 'text-amber-400'
+};
+const statCardClass = (tone: string) =>
+  tone === 'loss'
+    ? 'rounded-2xl border border-red-500/30 bg-red-500/[0.06] p-6 text-center'
+    : 'rounded-2xl border border-stone-700 bg-stone-900/70 p-6 text-center';
+const barFillClass = (tone: string) =>
+  tone === 'loss' ? 'bg-red-500/70' : 'bg-emerald-500/70';
+const barSignClass = (tone: string) =>
+  tone === 'loss' ? 'text-red-400' : 'text-emerald-400';
+---
+
+<BaseLayout
+  title={`${product.title} — The Operator Library`}
+  description={product.subtitle}
+>
+  <article class="pb-24 lg:pb-0">
+    <!-- ───────────── HERO ───────────── -->
+    <section
+      id="comprar"
+      class="relative scroll-mt-24 overflow-hidden border-b border-stone-800/80"
+    >
+      <CandlestickBackdrop />
+      <!-- Radial glow -->
+      <div
+        class="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-amber-400/10 blur-3xl"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:py-24">
+        <div class="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_24rem]">
+          <!-- Hero copy -->
+          <div>
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium tracking-wide text-amber-300"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+              {content.hero.badge}
+            </span>
+
+            <h1
+              class="mt-5 text-3xl font-semibold tracking-tight text-stone-50 sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]"
+            >
+              {product.title}
+            </h1>
+            <p class="mt-5 max-w-xl text-lg leading-relaxed text-stone-300">
+              {product.subtitle}
+            </p>
+
+            <!-- Price block -->
+            <div class="mt-8 flex flex-wrap items-end gap-x-4 gap-y-2">
+              {
+                product.regularPriceCLP && (
+                  <span class="text-lg text-stone-400 line-through">
+                    {formatCLP(product.regularPriceCLP)}
+                  </span>
+                )
+              }
+              <span class="text-4xl font-bold text-stone-50">
+                {formatCLP(product.priceCLP)}
+              </span>
+              {
+                discountPct > 0 && (
+                  <span class="rounded-md bg-emerald-500/15 px-2 py-1 text-sm font-semibold text-emerald-400">
+                    -{discountPct}% precio de lanzamiento
+                  </span>
+                )
+              }
+            </div>
+
+            <p class="mt-4 max-w-md text-sm font-medium text-stone-300">
+              {content.hero.bundleLine}
+            </p>
+
+            <BuyForm slug={product.slug} note={content.hero.buyNote} class="mt-6" />
+
+            <p
+              class="mt-5 max-w-md rounded-lg border border-stone-700 bg-stone-900/60 px-4 py-3 text-sm leading-relaxed text-stone-300"
+            >
+              {content.hero.trust}
+            </p>
+          </div>
+
+          <!-- Hero cover -->
+          <div class="mx-auto w-full max-w-xs lg:max-w-none">
+            <div class="relative">
+              <div
+                class="absolute -inset-4 rounded-2xl bg-amber-400/10 blur-2xl"
+                aria-hidden="true"
+              >
+              </div>
+              <img
+                src={product.coverImage}
+                alt={`Portada de ${product.title}`}
+                class="relative aspect-[2/3] w-full rounded-xl border border-stone-700/60 object-cover shadow-2xl shadow-black/50"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── LO QUE RECIBES HOY ───────────── -->
+    <section class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-2xl font-semibold text-stone-50 sm:text-3xl">
+          {content.included.heading}
+        </h2>
+        <p class="mt-3 text-stone-300">{content.included.intro}</p>
+      </div>
+
+      <ul class="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">
+        {
+          content.included.items.map((item) => (
+            <li class="flex items-start gap-3 rounded-xl border border-stone-700 bg-stone-900/60 px-4 py-3.5">
+              <svg
+                class="mt-0.5 h-5 w-5 flex-none text-emerald-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.1 3.1 6.8-6.8a1 1 0 0 1 1.4 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-stone-200">
+                {item.label}
+                {item.note && (
+                  <span class="block text-sm text-stone-400">{item.note}</span>
+                )}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- ───────────── POR QUÉ ESTE LIBRO EXISTE ───────────── -->
+    <section class="border-y border-stone-800/80 bg-stone-900/50">
+      <div class="mx-auto max-w-3xl px-6 py-16 sm:py-20">
+        <p class="text-sm font-medium tracking-widest text-amber-400 uppercase">
+          {content.why.eyebrow}
+        </p>
+        <h2 class="mt-3 text-2xl font-semibold text-stone-50 sm:text-3xl">
+          {content.why.heading}
+        </h2>
+        <div class="mt-6 space-y-5 text-lg leading-relaxed text-stone-300">
+          {content.why.paragraphs.map((p) => <p set:html={p} />)}
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── STAT / CHART CARD ───────────── -->
+    <section class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-2xl font-semibold text-stone-50 sm:text-3xl">
+          {content.problem.heading}
+        </h2>
+        <p class="mt-3 text-stone-300">{content.problem.intro}</p>
+      </div>
+
+      <div class="mt-10 grid gap-5 md:grid-cols-3">
+        {
+          content.problem.stats.map((stat) => (
+            <div class={statCardClass(stat.tone)}>
+              <p class:list={['text-5xl font-bold', statValueClass[stat.tone]]}>
+                {stat.value}
+              </p>
+              <p class="mt-2 font-medium text-stone-200">{stat.label}</p>
+              <p class="mt-1 text-sm text-stone-400">{stat.note}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Mini bar comparison -->
+      <div
+        class="mx-auto mt-6 max-w-2xl rounded-2xl border border-stone-700 bg-stone-900/70 p-6"
+      >
+        <div class="space-y-4">
+          {
+            content.problem.bars.map((bar) => (
+              <div>
+                <div class="mb-1 flex justify-between text-sm">
+                  <span class="text-stone-300">{bar.label}</span>
+                  <span class={barSignClass(bar.tone)}>{bar.sign}</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-stone-800">
+                  <div
+                    class:list={['h-3 rounded-full', barFillClass(bar.tone)]}
+                    style={`width:${bar.widthPct}%`}
+                  />
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <p class="mt-4 text-center text-xs text-stone-400">
+          {content.problem.barsCaption}
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────────── BONOS INCLUIDOS ───────────── -->
+    <section class="border-y border-stone-800/80 bg-stone-900/50">
+      <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <div class="mx-auto max-w-2xl text-center">
+          <span
+            class="inline-flex rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium tracking-wide text-amber-300"
+          >
+            {content.bonuses.badge}
+          </span>
+          <h2 class="mt-4 text-2xl font-semibold text-stone-50 sm:text-3xl">
+            {content.bonuses.heading}
+          </h2>
+          <p class="mt-3 text-stone-300">{content.bonuses.intro}</p>
+        </div>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {
+            content.bonuses.items.map((bonus, i) => (
+              <div class="group flex flex-col overflow-hidden rounded-2xl border border-stone-700 bg-stone-900/60 transition hover:border-amber-400/40">
+                <div class="relative aspect-[4/3] overflow-hidden border-b border-stone-800 bg-gradient-to-br from-stone-800 to-stone-950">
+                  <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-amber-300/70">
+                    <svg
+                      class="h-9 w-9"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="4" width="18" height="16" rx="2" />
+                      <path d="M3 15l5-4 4 3 4-5 5 6" />
+                    </svg>
+                    <span class="text-[11px] font-medium tracking-wider uppercase">
+                      Vista previa
+                    </span>
+                  </div>
+                  <img
+                    src={bonus.image}
+                    alt={`Vista previa: ${bonus.title}`}
+                    loading="lazy"
+                    class="relative h-full w-full object-cover transition group-hover:scale-[1.02]"
+                    onerror="this.style.display='none'"
+                  />
+                </div>
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-amber-400/15 text-sm font-bold text-amber-300">
+                      {i + 1}
+                    </span>
+                    <span class="text-xs font-medium tracking-wider text-stone-400 uppercase">
+                      Bono {i + 1}
+                    </span>
+                  </div>
+                  <h3 class="mt-4 font-semibold text-stone-100">{bonus.title}</h3>
+                  <p class="mt-2 text-sm leading-relaxed text-stone-300">
+                    {bonus.description}
+                  </p>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── PARA QUIÉN ES / NO ES ───────────── -->
+    <section class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.05] p-7">
+          <h3 class="text-xl font-semibold text-stone-50">
+            {content.audience.forTitle}
+          </h3>
+          <ul class="mt-5 space-y-3 text-stone-300">
+            {
+              content.audience.forItems.map((item) => (
+                <li class="flex items-start gap-3">
+                  <span class="mt-1 text-emerald-400">✓</span>
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="rounded-2xl border border-red-500/25 bg-red-500/[0.05] p-7">
+          <h3 class="text-xl font-semibold text-stone-50">
+            {content.audience.notForTitle}
+          </h3>
+          <ul class="mt-5 space-y-3 text-stone-300">
+            {
+              content.audience.notForItems.map((item) => (
+                <li class="flex items-start gap-3">
+                  <span class="mt-1 text-red-400">✕</span>
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── QUÉ CUBRE EL LIBRO ───────────── -->
+    <section class="border-y border-stone-800/80 bg-stone-900/50">
+      <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <div class="grid gap-10 lg:grid-cols-[20rem_minmax(0,1fr)]">
+          <div>
+            <h2 class="text-2xl font-semibold text-stone-50 sm:text-3xl">
+              {content.coverage.heading}
+            </h2>
+            <p class="mt-3 text-stone-300">{content.coverage.intro}</p>
+            <div class="mt-6 flex gap-6">
+              <div>
+                <p class="text-3xl font-bold text-amber-400">
+                  {content.coverage.details.pages}
+                </p>
+                <p class="text-sm text-stone-400">páginas</p>
+              </div>
+              <div>
+                <p class="text-3xl font-bold text-amber-400">
+                  {content.coverage.details.chapters}
+                </p>
+                <p class="text-sm text-stone-400">capítulos</p>
+              </div>
+              <div>
+                <p class="text-3xl font-bold text-amber-400">
+                  {content.coverage.details.parts}
+                </p>
+                <p class="text-sm text-stone-400">partes</p>
+              </div>
+            </div>
+          </div>
+
+          <ul class="grid gap-3 sm:grid-cols-2">
+            {
+              content.coverage.topics.map((topic) => (
+                <li class="flex items-start gap-3 rounded-xl border border-stone-700 bg-stone-900/60 px-4 py-3.5 text-stone-200">
+                  <span
+                    class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-amber-400"
+                    aria-hidden="true"
+                  />
+                  <span>{topic}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── VISTA PREVIA DEL LIBRO ───────────── -->
+    <section class="border-y border-stone-800/80 bg-stone-900/50">
+      <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-sm font-medium tracking-widest text-amber-400 uppercase">
+            {content.preview.eyebrow}
+          </p>
+          <h2 class="mt-3 text-2xl font-semibold text-stone-50 sm:text-3xl">
+            {content.preview.heading}
+          </h2>
+          <p class="mt-3 text-stone-300">{content.preview.intro}</p>
+        </div>
+
+        <div class="mt-10 grid gap-5 md:grid-cols-3">
+          {
+            content.preview.items.map((item, i) => (
+              <article class="flex flex-col rounded-2xl border border-stone-700 bg-stone-900/60 p-6">
+                <span class="text-sm font-semibold tracking-widest text-amber-300">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3 class="mt-3 text-lg font-semibold text-stone-100">
+                  {item.title}
+                </h3>
+                <p class="mt-3 flex-1 leading-relaxed text-stone-300">
+                  “{item.teaser}”
+                </p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── FAQ ───────────── -->
+    <section class="mx-auto max-w-3xl px-6 py-16 sm:py-20">
+      <h2 class="text-center text-2xl font-semibold text-stone-50 sm:text-3xl">
+        {content.faq.heading}
+      </h2>
+      <div class="mt-10 space-y-3">
+        {
+          content.faq.items.map((faq) => (
+            <details class="group rounded-xl border border-stone-700 bg-stone-900/60 px-5 py-4">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-stone-100">
+                {faq.q}
+                <span class="text-stone-400 transition group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p class="mt-3 text-stone-300">{faq.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- ───────────── FINAL CTA ───────────── -->
+    <section class="border-t border-stone-800/80 bg-stone-900/50">
+      <div class="mx-auto max-w-2xl px-6 py-16 text-center sm:py-20">
+        <h2 class="text-2xl font-semibold text-stone-50 sm:text-3xl">
+          {content.finalCta.heading}
+        </h2>
+        <div class="mt-6 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
+          {
+            product.regularPriceCLP && (
+              <span class="text-lg text-stone-400 line-through">
+                {formatCLP(product.regularPriceCLP)}
+              </span>
+            )
+          }
+          <span class="text-4xl font-bold text-stone-50">
+            {formatCLP(product.priceCLP)}
+          </span>
+        </div>
+
+        <BuyForm slug={product.slug} class="mx-auto mt-6" />
+        <p class="mt-4 text-sm text-stone-400">{content.finalCta.buyNote}</p>
+        <p class="mx-auto mt-6 max-w-md text-xs leading-relaxed text-stone-600">
+          {content.finalCta.disclaimer}
+        </p>
+      </div>
+    </section>
+  </article>
+
+  <!-- ───────────── STICKY MOBILE BUY BAR ───────────── -->
+  <div
+    class="fixed inset-x-0 bottom-0 z-40 border-t border-stone-800 bg-stone-950/95 backdrop-blur lg:hidden"
+  >
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div class="leading-tight">
+        <div class="flex items-baseline gap-2">
+          {
+            product.regularPriceCLP && (
+              <span class="text-xs text-stone-400 line-through">
+                {formatCLP(product.regularPriceCLP)}
+              </span>
+            )
+          }
+          <span class="text-lg font-bold text-stone-50">
+            {formatCLP(product.priceCLP)}
+          </span>
+        </div>
+        <span class="text-[11px] text-stone-400">{content.stickyLabel}</span>
+      </div>
+      <a
+        href="#comprar"
+        class="rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
+      >
+        Comprar ahora
+      </a>
+    </div>
+  </div>
+</BaseLayout>
