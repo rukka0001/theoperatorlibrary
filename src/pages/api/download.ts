@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { get } from '@vercel/blob';
 import { getProduct } from '../../config/products';
 import { verifyDownloadToken } from '../../lib/download-token';
-import { requireEnv } from '../../lib/env';
+import { getEnv } from '../../lib/env';
 
 // Server-rendered endpoint (Vercel serverless function).
 export const prerender = false;
@@ -42,15 +42,19 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   try {
-    const blobToken = requireEnv('BLOB_READ_WRITE_TOKEN');
+    // Authenticate the private-blob read. The store is provisioned in OIDC mode
+    // (BLOB_STORE_ID + the VERCEL_OIDC_TOKEN that Vercel auto-injects into the
+    // function runtime), so we let the SDK resolve those by default. If a
+    // BLOB_READ_WRITE_TOKEN is explicitly set (e.g. local dev), prefer it.
+    const blobToken = getEnv('BLOB_READ_WRITE_TOKEN');
 
-    // Fetch the private blob by pathname. `get` authenticates with the token
-    // and returns a stream, so the permanent Blob URL is never exposed and the
-    // store can stay private. (A 304 only happens with ifNoneMatch, which we
-    // don't send, so `stream` is always present on success.)
+    // Fetch the private blob by pathname. `get` returns a stream, so the
+    // permanent Blob URL is never exposed and the store can stay private. (A 304
+    // only happens with ifNoneMatch, which we don't send, so `stream` is always
+    // present on success.)
     const result = await get(file.blobKey, {
       access: 'private',
-      token: blobToken
+      ...(blobToken ? { token: blobToken } : {})
     });
     if (!result || !result.stream) {
       return new Response('Archivo no disponible.', { status: 404 });
