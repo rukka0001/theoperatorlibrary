@@ -1,6 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { supportEmail } from '../config/business';
+import { listProducts } from '../config/products';
+
+// Single-product store: report the launch price as the Purchase value so Meta
+// gets a real amount + currency. When the catalog grows, pass the actual order
+// amount instead (e.g. via a param on Flow's return URL).
+const purchaseValue = listProducts()[0]?.priceCLP ?? 0;
+const purchaseCurrency = 'CLP';
 ---
 
 <BaseLayout
@@ -30,4 +37,14 @@ import { supportEmail } from '../config/business';
       Volver al catálogo
     </a>
   </section>
+
+  <!-- Meta Pixel: Purchase conversion (fires once the page loads) -->
+  <script
+    is:inline
+    define:vars={{ value: purchaseValue, currency: purchaseCurrency }}
+  >
+    if (typeof fbq === 'function') {
+      fbq('track', 'Purchase', { value: value, currency: currency });
+    }
+  </script>
 </BaseLayout>
