@@ -2,6 +2,7 @@
  * FAQ for "El Trader Que Perdía Ganando".
  */
 import type { BookContent } from '../types';
+import { supportEmail } from '../../../config/business';
 
 export const faq: BookContent['faq'] = {
   heading: 'Preguntas frecuentes',
@@ -16,7 +17,7 @@ export const faq: BookContent['faq'] = {
     },
     {
       q: '¿Cómo recibo el ebook?',
-      a: 'Después del pago recibes un correo con los botones de descarga de todos los archivos: PDF, EPUB, Kindle/AZW3 y las hojas de referencia.'
+      a: `Después del pago recibes un correo con los botones de descarga de todos los archivos: PDF, EPUB, Kindle/AZW3 y las hojas de referencia. Si no lo ves en unos minutos, revisa tu carpeta de spam o escríbenos a ${supportEmail}.`
     },
     {
       q: '¿Sirve si estoy en Chile?',

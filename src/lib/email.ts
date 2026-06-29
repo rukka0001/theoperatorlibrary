@@ -7,6 +7,7 @@
  */
 import { Resend } from 'resend';
 import { requireEnv } from './env';
+import { supportEmail } from '../config/business';
 import type { Product } from '../config/products';
 
 let client: Resend | null = null;
@@ -86,7 +87,10 @@ export async function sendDownloadEmail(
     to,
     subject: `Tu descarga: ${product.title}`,
     html: renderHtml(input),
-    text: renderText(input)
+    text: renderText(input),
+    // Replies (download problems, support) go to the support inbox, not the
+    // no-reply delivery sender.
+    replyTo: supportEmail
   });
 }
 
@@ -200,7 +204,9 @@ function renderText({ product, downloadUrl, ttlDays }: DownloadEmailInput): stri
     ``,
     `(Estos enlaces son personales y vencen en ${ttlDays} días.)`,
     ``,
-    `Solo para fines educativos. No es asesoramiento financiero.`,
+    `Si tienes algún problema con la descarga, responde a este correo o escríbenos a ${supportEmail}.`,
+    ``,
+    `Solo para fines educativos. No es asesoramiento financiero. No incluye alertas ni señales. El trading conlleva riesgo de pérdida de capital.`,
     `The Operator Library`
   ].join('\n');
 }
@@ -249,6 +255,11 @@ function renderHtml({ product, downloadUrl, ttlDays }: DownloadEmailInput): stri
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
                 <p style="margin:16px 0 0;font-size:13px;color:#a8a29e;">
                   Estos enlaces son personales y vencen en ${ttlDays} días.
+                </p>
+                <p style="margin:12px 0 0;font-size:13px;line-height:1.6;color:#78716c;">
+                  Si tienes algún problema con la descarga, responde a este correo
+                  o escríbenos a
+                  <a href="mailto:${supportEmail}" style="color:#b45309;text-decoration:underline;">${supportEmail}</a>.
                 </p>
               </td>
             </tr>

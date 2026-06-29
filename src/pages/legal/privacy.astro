@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { contactEmail } from '../../config/business';
 ---
 
 <BaseLayout
@@ -27,7 +28,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </p>
       <p>
         Puedes solicitar la eliminación de tus datos escribiéndonos a
-        [CORREO_DE_CONTACTO].
+        <a href={`mailto:${contactEmail}`} class="text-amber-300 underline hover:text-amber-200">{contactEmail}</a>.
       </p>
     </div>
   </section>

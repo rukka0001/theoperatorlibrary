@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supportEmail } from '../../config/business';
 ---
 
 <BaseLayout
@@ -28,7 +29,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </p>
       <p>
         <strong>Contacto:</strong> para cualquier consulta escríbenos a
-        [CORREO_DE_CONTACTO].
+        <a href={`mailto:${supportEmail}`} class="text-amber-300 underline hover:text-amber-200">{supportEmail}</a>.
       </p>
     </div>
   </section>

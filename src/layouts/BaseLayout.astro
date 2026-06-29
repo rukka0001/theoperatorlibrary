@@ -2,6 +2,7 @@
 // Site-wide base layout. Importing global.css here makes Tailwind available
 // to every page that uses this layout.
 import '../styles/global.css';
+import { contactEmail } from '../config/business';
 
 interface Props {
   title: string;
@@ -56,6 +57,12 @@ const { title, description = 'The Operator Library — libros para operadores.' 
         >
           <p>© {new Date().getFullYear()} The Operator Library</p>
           <ul class="flex flex-wrap gap-x-5 gap-y-2">
+            <li>
+              <a
+                href={`mailto:${contactEmail}`}
+                class="transition hover:text-stone-300">Contacto</a
+              >
+            </li>
             <li>
               <a href="/legal/disclaimer" class="transition hover:text-stone-300"
                 >Aviso legal</a

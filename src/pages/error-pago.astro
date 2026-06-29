@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { supportEmail } from '../config/business';
 ---
 
 <BaseLayout
@@ -26,7 +27,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         Volver a intentar
       </a>
       <a
-        href="/legal/terms"
+        href={`mailto:${supportEmail}`}
         class="rounded-lg border border-stone-700 px-5 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/60 hover:text-amber-300"
       >
         Necesito ayuda

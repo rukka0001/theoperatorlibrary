@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { supportEmail } from '../config/business';
 ---
 
 <BaseLayout
@@ -20,7 +21,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </p>
     <p class="mt-3 text-sm text-stone-500">
       ¿No ves el correo en unos minutos? Revisa tu carpeta de spam o
-      <a href="/legal/terms" class="underline hover:text-stone-300">contáctanos</a>.
+      <a href={`mailto:${supportEmail}`} class="underline hover:text-stone-300">escríbenos a {supportEmail}</a>.
     </p>
     <a
       href="/es"
