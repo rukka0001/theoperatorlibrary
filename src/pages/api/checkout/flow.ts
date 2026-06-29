@@ -43,7 +43,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       amount: product.priceCLP,
       email,
       urlConfirmation: `${siteUrl}/api/webhooks/flow`,
-      urlReturn: `${siteUrl}/gracias`,
+      // Flow POSTs the buyer's browser back to urlReturn; /gracias is static
+      // (GET-only) so we route through an endpoint that redirects to it.
+      urlReturn: `${siteUrl}/api/return/flow`,
       optional: { slug: product.slug }
     });
 
