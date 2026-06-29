@@ -6,7 +6,7 @@ import {
   createDownloadToken,
   getDownloadTtlDays
 } from '../../../lib/download-token';
-import { sendDownloadEmail } from '../../../lib/email';
+import { sendDownloadEmail, sendOrderNotificationEmail } from '../../../lib/email';
 
 // Server-rendered endpoint (Vercel serverless function).
 export const prerender = false;
@@ -104,6 +104,32 @@ export const POST: APIRoute = async ({ request }) => {
       product: product.slug,
       email
     });
+
+    // Buyer delivery succeeded — send the internal sale notification as a
+    // best-effort side effect. It carries NO download links/secrets, and must
+    // never block or undo fulfillment: if ORDER_NOTIFICATION_EMAIL is unset we
+    // simply skip it, and any send failure is logged but swallowed (no retry,
+    // no 500) so the buyer's confirmed delivery stays the source of truth.
+    const notifyTo = getEnv('ORDER_NOTIFICATION_EMAIL');
+    if (notifyTo) {
+      try {
+        await sendOrderNotificationEmail({
+          to: notifyTo,
+          productTitle: product.title,
+          buyerEmail: email,
+          amount: payment.amount,
+          currency: payment.raw?.currency ?? 'CLP',
+          commerceOrder: payment.commerceOrder,
+          flowStatus: 'PAID',
+          date: new Date()
+        });
+      } catch (notifyError) {
+        console.error(
+          `[webhooks/flow] internal order notification failed for ${payment.commerceOrder} (delivery already sent):`,
+          notifyError
+        );
+      }
+    }
 
     return new Response('OK', { status: 200 });
   } catch (error) {

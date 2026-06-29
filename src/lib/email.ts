@@ -90,6 +90,102 @@ export async function sendDownloadEmail(
   });
 }
 
+export interface OrderNotificationInput {
+  /** Internal recipient (ORDER_NOTIFICATION_EMAIL). */
+  to: string;
+  /** Purchased product title. */
+  productTitle: string;
+  /** Buyer email. */
+  buyerEmail: string;
+  /** Amount paid (as reported by Flow). */
+  amount: string;
+  /** Currency code (e.g. CLP). */
+  currency: string;
+  /** Flow commerceOrder id. */
+  commerceOrder: string;
+  /** Flow payment status (human label, e.g. "PAID"). */
+  flowStatus: string;
+  /** When the sale was processed. */
+  date: Date;
+}
+
+/**
+ * Send the INTERNAL order notification (sale alert) to ourselves after the
+ * buyer's delivery email has gone out. Intentionally contains NO download links
+ * or secrets — just the facts of the sale. Throws on failure; the caller must
+ * swallow the error so it never blocks fulfillment.
+ */
+export async function sendOrderNotificationEmail(
+  input: OrderNotificationInput
+): Promise<void> {
+  await sendEmail({
+    to: input.to,
+    subject: 'Nueva venta: El Trader Que Perdía Ganando',
+    html: renderOrderNotificationHtml(input),
+    text: renderOrderNotificationText(input)
+  });
+}
+
+function renderOrderNotificationText(input: OrderNotificationInput): string {
+  return [
+    `Nueva venta confirmada.`,
+    ``,
+    `Producto: ${input.productTitle}`,
+    `Comprador: ${input.buyerEmail}`,
+    `Monto: ${input.amount} ${input.currency}`,
+    `Moneda: ${input.currency}`,
+    `commerceOrder: ${input.commerceOrder}`,
+    `Estado de pago (Flow): ${input.flowStatus}`,
+    `Fecha/hora: ${input.date.toISOString()}`,
+    ``,
+    `El email de entrega fue enviado al comprador correctamente.`
+  ].join('\n');
+}
+
+function renderOrderNotificationHtml(input: OrderNotificationInput): string {
+  const row = (label: string, value: string) => `
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid #f0eeec;font-size:13px;color:#78716c;white-space:nowrap;">${escapeHtml(label)}</td>
+          <td style="padding:8px 0 8px 16px;border-bottom:1px solid #f0eeec;font-size:14px;color:#1c1917;font-weight:600;">${escapeHtml(value)}</td>
+        </tr>`;
+
+  return `<!doctype html>
+<html lang="es">
+  <body style="margin:0;padding:0;background:#0c0a09;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c0a09;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;">
+            <tr>
+              <td style="background:#0c0a09;padding:20px 28px;">
+                <span style="color:#fafaf9;font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">The Operator Library — Nueva venta</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 28px 8px;">
+                <h1 style="margin:0 0 16px;font-size:20px;color:#1c1917;">Venta confirmada</h1>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  ${row('Producto', input.productTitle)}
+                  ${row('Comprador', input.buyerEmail)}
+                  ${row('Monto', `${input.amount} ${input.currency}`)}
+                  ${row('Moneda', input.currency)}
+                  ${row('commerceOrder', input.commerceOrder)}
+                  ${row('Estado de pago (Flow)', input.flowStatus)}
+                  ${row('Fecha/hora', input.date.toISOString())}
+                </table>
+                <p style="margin:20px 0 28px;font-size:13px;line-height:1.6;color:#16a34a;font-weight:600;">
+                  ✓ El email de entrega fue enviado al comprador correctamente.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
 function renderText({ product, downloadUrl, ttlDays }: DownloadEmailInput): string {
   const files = product.files
     .map((f) => `- ${f.label}: ${fileUrl(downloadUrl, f.id)}`)
