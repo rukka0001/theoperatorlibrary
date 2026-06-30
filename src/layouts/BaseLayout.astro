@@ -7,14 +7,34 @@ import { contactEmail } from '../config/business';
 interface Props {
   title: string;
   description?: string;
+  lang?: 'es' | 'en';
 }
 
-const { title, description = 'The Operator Library — libros para operadores.' } =
+const { title, description = 'The Operator Library — libros para operadores.', lang = 'es' } =
   Astro.props;
+
+const chrome = {
+  es: {
+    home: '/es',
+    catalog: 'Catálogo',
+    contact: 'Contacto',
+    disclaimer: 'Aviso legal',
+    privacy: 'Privacidad',
+    terms: 'Términos'
+  },
+  en: {
+    home: '/en/day-trading-from-inside-the-problem',
+    catalog: 'Catalog',
+    contact: 'Contact',
+    disclaimer: 'Disclaimer',
+    privacy: 'Privacy',
+    terms: 'Terms'
+  }
+}[lang];
 ---
 
 <!doctype html>
-<html lang="es" class="h-full">
+<html lang={lang} class="h-full">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -71,16 +91,16 @@ const { title, description = 'The Operator Library — libros para operadores.' 
           class="mx-auto flex max-w-5xl items-center justify-between px-6 py-5"
         >
           <a
-            href="/es"
+            href={chrome.home}
             class="text-sm font-semibold tracking-widest text-stone-100 uppercase"
           >
             The Operator Library
           </a>
           <a
-            href="/es"
+            href={chrome.home}
             class="text-sm text-stone-400 transition hover:text-amber-300"
           >
-            Catálogo
+            {chrome.catalog}
           </a>
         </nav>
       </header>
@@ -98,22 +118,22 @@ const { title, description = 'The Operator Library — libros para operadores.' 
             <li>
               <a
                 href={`mailto:${contactEmail}`}
-                class="transition hover:text-stone-300">Contacto</a
+                class="transition hover:text-stone-300">{chrome.contact}</a
               >
             </li>
             <li>
               <a href="/legal/disclaimer" class="transition hover:text-stone-300"
-                >Aviso legal</a
+                >{chrome.disclaimer}</a
               >
             </li>
             <li>
               <a href="/legal/privacy" class="transition hover:text-stone-300"
-                >Privacidad</a
+                >{chrome.privacy}</a
               >
             </li>
             <li>
               <a href="/legal/terms" class="transition hover:text-stone-300"
-                >Términos</a
+                >{chrome.terms}</a
               >
             </li>
           </ul>

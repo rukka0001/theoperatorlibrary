@@ -113,3 +113,17 @@ export const finalCta: BookContent['finalCta'] = {
 };
 
 export const stickyLabel = 'Ebook + 4 bonos';
+
+export const ui: BookContent['ui'] = {
+  launchSuffix: 'precio de lanzamiento',
+  previewBadge: 'Vista previa',
+  bonusWord: 'Bono',
+  pagesLabel: 'páginas',
+  chaptersLabel: 'capítulos',
+  partsLabel: 'partes',
+  coverAltPrefix: 'Portada de',
+  previewAltPrefix: 'Vista previa:',
+  stickyCta: 'Comprar ahora',
+  emailPlaceholder: 'tucorreo@ejemplo.com',
+  buyCta: 'Comprar ahora'
+};

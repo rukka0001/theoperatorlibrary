@@ -34,6 +34,7 @@ const barSignClass = (tone: string) =>
 <BaseLayout
   title={`${product.title} — The Operator Library`}
   description={product.subtitle}
+  lang={product.language}
 >
   <article class="pb-24 lg:pb-0">
     <!-- ───────────── HERO ───────────── -->
@@ -84,7 +85,7 @@ const barSignClass = (tone: string) =>
               {
                 discountPct > 0 && (
                   <span class="rounded-md bg-emerald-500/15 px-2 py-1 text-sm font-semibold text-emerald-400">
-                    -{discountPct}% precio de lanzamiento
+                    -{discountPct}% {content.ui.launchSuffix}
                   </span>
                 )
               }
@@ -94,7 +95,7 @@ const barSignClass = (tone: string) =>
               {content.hero.bundleLine}
             </p>
 
-            <BuyForm slug={product.slug} note={content.hero.buyNote} class="mt-6" />
+            <BuyForm slug={product.slug} provider={product.provider} ctaLabel={content.ui.buyCta} placeholder={content.ui.emailPlaceholder} note={content.hero.buyNote} class="mt-6" />
 
             <p
               class="mt-5 max-w-md rounded-lg border border-stone-700 bg-stone-900/60 px-4 py-3 text-sm leading-relaxed text-stone-300"
@@ -113,7 +114,7 @@ const barSignClass = (tone: string) =>
               </div>
               <img
                 src={product.coverImage}
-                alt={`Portada de ${product.title}`}
+                alt={`${content.ui.coverAltPrefix} ${product.title}`}
                 class="relative aspect-[2/3] w-full rounded-xl border border-stone-700/60 object-cover shadow-2xl shadow-black/50"
               />
             </div>
@@ -258,12 +259,12 @@ const barSignClass = (tone: string) =>
                       <path d="M3 15l5-4 4 3 4-5 5 6" />
                     </svg>
                     <span class="text-[11px] font-medium tracking-wider uppercase">
-                      Vista previa
+                      {content.ui.previewBadge}
                     </span>
                   </div>
                   <img
                     src={bonus.image}
-                    alt={`Vista previa: ${bonus.title}`}
+                    alt={`${content.ui.previewAltPrefix} ${bonus.title}`}
                     loading="lazy"
                     class="relative h-full w-full object-cover transition group-hover:scale-[1.02]"
                     onerror="this.style.display='none'"
@@ -275,7 +276,7 @@ const barSignClass = (tone: string) =>
                       {i + 1}
                     </span>
                     <span class="text-xs font-medium tracking-wider text-stone-400 uppercase">
-                      Bono {i + 1}
+                      {content.ui.bonusWord} {i + 1}
                     </span>
                   </div>
                   <h3 class="mt-4 font-semibold text-stone-100">{bonus.title}</h3>
@@ -341,19 +342,19 @@ const barSignClass = (tone: string) =>
                 <p class="text-3xl font-bold text-amber-400">
                   {content.coverage.details.pages}
                 </p>
-                <p class="text-sm text-stone-400">páginas</p>
+                <p class="text-sm text-stone-400">{content.ui.pagesLabel}</p>
               </div>
               <div>
                 <p class="text-3xl font-bold text-amber-400">
                   {content.coverage.details.chapters}
                 </p>
-                <p class="text-sm text-stone-400">capítulos</p>
+                <p class="text-sm text-stone-400">{content.ui.chaptersLabel}</p>
               </div>
               <div>
                 <p class="text-3xl font-bold text-amber-400">
                   {content.coverage.details.parts}
                 </p>
-                <p class="text-sm text-stone-400">partes</p>
+                <p class="text-sm text-stone-400">{content.ui.partsLabel}</p>
               </div>
             </div>
           </div>
@@ -449,7 +450,7 @@ const barSignClass = (tone: string) =>
           </span>
         </div>
 
-        <BuyForm slug={product.slug} class="mx-auto mt-6" />
+        <BuyForm slug={product.slug} provider={product.provider} ctaLabel={content.ui.buyCta} placeholder={content.ui.emailPlaceholder} class="mx-auto mt-6" />
         <p class="mt-4 text-sm text-stone-400">{content.finalCta.buyNote}</p>
         <p class="mx-auto mt-6 max-w-md text-xs leading-relaxed text-stone-600">
           {content.finalCta.disclaimer}
@@ -482,7 +483,7 @@ const barSignClass = (tone: string) =>
         href="#comprar"
         class="rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
       >
-        Comprar ahora
+        {content.ui.stickyCta}
       </a>
     </div>
   </div>

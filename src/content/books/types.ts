@@ -110,6 +110,28 @@ export interface BookContent {
     buyNote: string;
     disclaimer: string;
   };
+  /** Language-specific UI micro-copy used by the BookPage chrome. */
+  ui: {
+    /** Suffix after the discount %, e.g. "launch price". */
+    launchSuffix: string;
+    /** Bonus image placeholder label, e.g. "Preview". */
+    previewBadge: string;
+    /** Word before the bonus index, e.g. "Bonus". */
+    bonusWord: string;
+    pagesLabel: string;
+    chaptersLabel: string;
+    partsLabel: string;
+    /** Prefix for the cover image alt text, e.g. "Cover of". */
+    coverAltPrefix: string;
+    /** Prefix for a bonus preview alt text, e.g. "Preview:". */
+    previewAltPrefix: string;
+    /** Sticky mobile bar CTA, e.g. "Buy now". */
+    stickyCta: string;
+    /** Email input placeholder. */
+    emailPlaceholder: string;
+    /** Default buy-button label. */
+    buyCta: string;
+  };
   /** Short label for the sticky mobile buy bar, e.g. "Ebook + 4 bonos". */
   stickyLabel: string;
 }

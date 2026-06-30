@@ -11,7 +11,8 @@ import {
   audience,
   coverage,
   finalCta,
-  stickyLabel
+  stickyLabel,
+  ui
 } from './copy';
 import { problem, preview } from './sections';
 import { faq } from './faq';
@@ -27,5 +28,6 @@ export const content: BookContent = {
   preview,
   faq,
   finalCta,
+  ui,
   stickyLabel
 };
