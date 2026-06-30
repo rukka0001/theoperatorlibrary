@@ -38,7 +38,7 @@ describe('verifyWebhookSignature', () => {
     expect(verifyWebhookSignature(body, good, secret)).toBe(true);
   });
   it('rejects a tampered signature', () => {
-    expect(verifyWebhookSignature(body, good.replace(/.$/, '0'), secret)).toBe(false);
+    expect(verifyWebhookSignature(body, good.slice(0, -1) + (good.slice(-1) === '0' ? '1' : '0'), secret)).toBe(false);
   });
   it('rejects a missing signature', () => {
     expect(verifyWebhookSignature(body, null, secret)).toBe(false);

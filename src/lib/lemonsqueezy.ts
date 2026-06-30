@@ -58,11 +58,22 @@ export async function createCheckout(
     body: JSON.stringify(buildCheckoutPayload({ ...input, storeId }))
   });
 
-  const data = (await res.json()) as Record<string, any>;
-  if (!res.ok || !data?.data?.attributes?.url) {
-    const detail =
-      data?.errors?.[0]?.detail ?? data?.message ?? `HTTP ${res.status}`;
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      const err = (await res.json()) as Record<string, any>;
+      detail = err?.errors?.[0]?.detail ?? err?.message ?? detail;
+    } catch {
+      // Non-JSON error body (e.g. a gateway HTML page) — keep the HTTP status.
+    }
     throw new Error(`Lemon Squeezy checkout create failed: ${detail}`);
+  }
+
+  const data = (await res.json()) as Record<string, any>;
+  if (!data?.data?.attributes?.url) {
+    throw new Error(
+      'Lemon Squeezy checkout create failed: missing checkout URL in response'
+    );
   }
   return { url: data.data.attributes.url as string };
 }
