@@ -1,13 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { supportEmail } from '../config/business';
-import { listProducts } from '../config/products';
+import { getProduct } from '../config/products';
 
-// Single-product store: report the launch price as the Purchase value so Meta
-// gets a real amount + currency. When the catalog grows, pass the actual order
-// amount instead (e.g. via a param on Flow's return URL).
-const purchaseValue = listProducts()[0]?.priceCLP ?? 0;
-const purchaseCurrency = 'CLP';
+const product = getProduct('el-trader-que-perdia-ganando');
+const purchaseValue = product?.price ?? 0;
+const purchaseCurrency = product?.currency ?? 'CLP';
 ---
 
 <BaseLayout

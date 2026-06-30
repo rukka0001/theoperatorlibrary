@@ -1,53 +1,51 @@
 /**
  * Product catalog for TheOperatorLibrary (commerce layer).
  *
- * There is no database — this file is the single source of truth for the books
- * we sell. It holds only commerce data: identity, pricing, cover image, and the
- * deliverable files. All sales/marketing copy for a book lives separately in
- * src/content/books/<slug>/ and is consumed by the landing page.
+ * No database — this file is the single source of truth for the books we sell:
+ * identity, provider, pricing, cover, and deliverable files. Sales/marketing copy
+ * lives separately in src/content/books/<slug>/.
  *
- * `blobKey` is the path of a deliverable inside Vercel Blob. It is never exposed
- * to the client; downloads go through a signed link served by /api/download.
+ * `blobKey` is the path of a deliverable inside Vercel Blob, never exposed to the
+ * client; downloads go through a signed link served by /api/download.
  */
 
 export interface DownloadFile {
-  /** URL-safe id used in /api/download?file=<id>. */
   id: string;
-  /** Row label shown beside the button in the delivery email. */
   label: string;
-  /** Download button text in the delivery email (e.g. "Descargar PDF"). */
   ctaLabel: string;
-  /** Filename presented to the buyer on download. */
   fileName: string;
-  /** Pathname of the file inside Vercel Blob. Never exposed to the client. */
   blobKey: string;
-  /** MIME type sent with the download. */
   contentType: string;
 }
 
 export interface Product {
-  /** URL slug under /es/<slug> and the canonical product id. */
+  /** URL slug under /<lang>/<slug> and the canonical product id. */
   slug: string;
-  /** Display title. */
   title: string;
-  /** Short tagline shown under the title and on catalog cards. */
   subtitle: string;
   author: string;
-  /** Launch price in Chilean pesos (CLP) — Flow charges in CLP. */
-  priceCLP: number;
-  /** Regular/anchor price shown crossed out. Optional. */
-  regularPriceCLP?: number;
-  /** ISO language code of the book. */
-  language: string;
-  /** Public cover image path (under /public). */
-  coverImage: string;
+  /** ISO language code of the book and its landing page. */
+  language: 'es' | 'en';
+  /** Which payment gateway sells this product. */
+  provider: 'flow' | 'lemonsqueezy';
+  /** ISO currency code (e.g. 'CLP', 'USD'). */
+  currency: string;
   /**
-   * The actual deliverables, streamed from Vercel Blob by /api/download.
+   * Launch price. For Flow this is the charged amount (CLP integer). For Lemon
+   * Squeezy the LS variant price is authoritative; this is display-only and must
+   * match the variant.
    */
+  price: number;
+  /** Regular/anchor price shown crossed out. Optional. */
+  regularPrice?: number;
+  coverImage: string;
   files: DownloadFile[];
+  /** Lemon Squeezy specifics (present when provider === 'lemonsqueezy'). */
+  lemonSqueezy?: { variantId: string };
 }
 
-const BLOB_PREFIX = 'books/el-trader-que-perdia-ganando/es';
+const ES_BLOB_PREFIX = 'books/el-trader-que-perdia-ganando/es';
+const EN_BLOB_PREFIX = 'books/day-trading-from-inside-the-problem/en';
 
 export const products: Record<string, Product> = {
   'el-trader-que-perdia-ganando': {
@@ -56,9 +54,11 @@ export const products: Record<string, Product> = {
     subtitle:
       'Cómo puedes ganar la mayoría de tus trades y aun así perder dinero — y cómo empezar a construir un sistema que proteja tu cuenta.',
     author: 'Chris Ruzicka',
-    priceCLP: 14990,
-    regularPriceCLP: 29990,
     language: 'es',
+    provider: 'flow',
+    currency: 'CLP',
+    price: 14990,
+    regularPrice: 29990,
     coverImage: '/images/books/el-trader-que-perdia-ganando/cover.png',
     files: [
       {
@@ -66,7 +66,7 @@ export const products: Record<string, Product> = {
         label: 'Ebook principal (PDF)',
         ctaLabel: 'Descargar PDF',
         fileName: 'El-Trader-Que-Perdia-Ganando.pdf',
-        blobKey: `${BLOB_PREFIX}/el-trader-que-perdia-ganando.pdf`,
+        blobKey: `${ES_BLOB_PREFIX}/el-trader-que-perdia-ganando.pdf`,
         contentType: 'application/pdf'
       },
       {
@@ -74,7 +74,7 @@ export const products: Record<string, Product> = {
         label: 'Versión EPUB',
         ctaLabel: 'Descargar EPUB',
         fileName: 'El-Trader-Que-Perdia-Ganando.epub',
-        blobKey: `${BLOB_PREFIX}/el-trader-que-perdia-ganando.epub`,
+        blobKey: `${ES_BLOB_PREFIX}/el-trader-que-perdia-ganando.epub`,
         contentType: 'application/epub+zip'
       },
       {
@@ -82,7 +82,7 @@ export const products: Record<string, Product> = {
         label: 'Versión Kindle / AZW3',
         ctaLabel: 'Descargar Kindle / AZW3',
         fileName: 'El-Trader-Que-Perdia-Ganando.azw3',
-        blobKey: `${BLOB_PREFIX}/el-trader-que-perdia-ganando.azw3`,
+        blobKey: `${ES_BLOB_PREFIX}/el-trader-que-perdia-ganando.azw3`,
         contentType: 'application/octet-stream'
       },
       {
@@ -90,28 +90,76 @@ export const products: Record<string, Product> = {
         label: 'Hojas de referencia (4 incluidas)',
         ctaLabel: 'Descargar hojas de referencia',
         fileName: 'Hojas-de-Referencia.pdf',
-        blobKey: `${BLOB_PREFIX}/hojas-de-referencia.pdf`,
+        blobKey: `${ES_BLOB_PREFIX}/hojas-de-referencia.pdf`,
+        contentType: 'application/pdf'
+      }
+    ]
+  },
+  'day-trading-from-inside-the-problem': {
+    slug: 'day-trading-from-inside-the-problem',
+    title: 'Day Trading from Inside the Problem',
+    subtitle:
+      'How you can win most of your trades and still lose money — and how to start building a system that protects your account.',
+    author: 'Chris Ruzicka',
+    language: 'en',
+    provider: 'lemonsqueezy',
+    currency: 'USD',
+    price: 18.99,
+    regularPrice: 38.99,
+    coverImage: '/images/books/day-trading-from-inside-the-problem/cover.png',
+    lemonSqueezy: { variantId: '1853026' },
+    files: [
+      {
+        id: 'pdf',
+        label: 'Main ebook (PDF)',
+        ctaLabel: 'Download PDF',
+        fileName: 'Day-Trading-From-Inside-The-Problem.pdf',
+        blobKey: `${EN_BLOB_PREFIX}/day-trading-from-inside-the-problem.pdf`,
+        contentType: 'application/pdf'
+      },
+      {
+        id: 'epub',
+        label: 'EPUB version',
+        ctaLabel: 'Download EPUB',
+        fileName: 'Day-Trading-From-Inside-The-Problem.epub',
+        blobKey: `${EN_BLOB_PREFIX}/day-trading-from-inside-the-problem.epub`,
+        contentType: 'application/epub+zip'
+      },
+      {
+        id: 'azw3',
+        label: 'Kindle / AZW3 version',
+        ctaLabel: 'Download Kindle / AZW3',
+        fileName: 'Day-Trading-From-Inside-The-Problem.azw3',
+        blobKey: `${EN_BLOB_PREFIX}/day-trading-from-inside-the-problem.azw3`,
+        contentType: 'application/octet-stream'
+      },
+      {
+        id: 'sheets',
+        label: 'Reference sheets (4 included)',
+        ctaLabel: 'Download reference sheets',
+        fileName: 'Reference-Sheets.pdf',
+        blobKey: `${EN_BLOB_PREFIX}/reference-sheets.pdf`,
         contentType: 'application/pdf'
       }
     ]
   }
 };
 
-/** Look up a product by slug. Returns undefined if it doesn't exist. */
 export function getProduct(slug: string): Product | undefined {
   return products[slug];
 }
 
-/** All products as an array, for listings. */
 export function listProducts(): Product[] {
   return Object.values(products);
 }
 
-/** Format a CLP amount as e.g. "$14.990". */
-export function formatCLP(amount: number): string {
-  return new Intl.NumberFormat('es-CL', {
+/** Format a price for display in its currency (e.g. "$14.990" CLP, "$18.99" USD). */
+export function formatPrice(amount: number, currency: string): string {
+  const locale = currency === 'CLP' ? 'es-CL' : 'en-US';
+  const maximumFractionDigits = currency === 'CLP' ? 0 : 2;
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'CLP',
-    maximumFractionDigits: 0
+    currency,
+    maximumFractionDigits
   }).format(amount);
 }

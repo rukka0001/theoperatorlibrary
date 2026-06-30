@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     const payment = await createPayment({
       commerceOrder,
       subject: product.title,
-      amount: product.priceCLP,
+      amount: product.price,
       email,
       urlConfirmation: `${siteUrl}/api/webhooks/flow`,
       // Flow POSTs the buyer's browser back to urlReturn; /gracias is static

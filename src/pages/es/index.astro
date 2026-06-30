@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { listProducts, formatCLP } from '../../config/products';
+import { listProducts, formatPrice } from '../../config/products';
 
 const products = listProducts();
 ---
@@ -45,13 +45,13 @@ const products = listProducts();
                 {product.subtitle}
               </p>
               <div class="mt-4 flex items-baseline gap-2">
-                {product.regularPriceCLP && (
+                {product.regularPrice && (
                   <span class="text-sm text-stone-600 line-through">
-                    {formatCLP(product.regularPriceCLP)}
+                    {formatPrice(product.regularPrice, product.currency)}
                   </span>
                 )}
                 <span class="text-base font-semibold text-amber-300">
-                  {formatCLP(product.priceCLP)}
+                  {formatPrice(product.price, product.currency)}
                 </span>
               </div>
             </div>

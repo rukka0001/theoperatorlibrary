@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "test": "vitest run",
     "upload-files": "node --env-file-if-exists=.env scripts/upload-files.ts"
   },
   "dependencies": {
@@ -20,5 +21,8 @@
     "jose": "^6.2.3",
     "resend": "^6.16.0",
     "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.6"
   }
 }

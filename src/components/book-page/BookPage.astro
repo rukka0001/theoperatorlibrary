@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BuyForm from './BuyForm.astro';
 import CandlestickBackdrop from './CandlestickBackdrop.astro';
-import { formatCLP, type Product } from '../../config/products';
+import { formatPrice, type Product } from '../../config/products';
 import type { BookContent } from '../../content/books/types';
 
 interface Props {
@@ -12,8 +12,8 @@ interface Props {
 
 const { product, content } = Astro.props;
 
-const discountPct = product.regularPriceCLP
-  ? Math.round((1 - product.priceCLP / product.regularPriceCLP) * 100)
+const discountPct = product.regularPrice
+  ? Math.round((1 - product.price / product.regularPrice) * 100)
   : 0;
 
 const statValueClass: Record<string, string> = {
@@ -72,14 +72,14 @@ const barSignClass = (tone: string) =>
             <!-- Price block -->
             <div class="mt-8 flex flex-wrap items-end gap-x-4 gap-y-2">
               {
-                product.regularPriceCLP && (
+                product.regularPrice && (
                   <span class="text-lg text-stone-400 line-through">
-                    {formatCLP(product.regularPriceCLP)}
+                    {formatPrice(product.regularPrice, product.currency)}
                   </span>
                 )
               }
               <span class="text-4xl font-bold text-stone-50">
-                {formatCLP(product.priceCLP)}
+                {formatPrice(product.price, product.currency)}
               </span>
               {
                 discountPct > 0 && (
@@ -438,14 +438,14 @@ const barSignClass = (tone: string) =>
         </h2>
         <div class="mt-6 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
           {
-            product.regularPriceCLP && (
+            product.regularPrice && (
               <span class="text-lg text-stone-400 line-through">
-                {formatCLP(product.regularPriceCLP)}
+                {formatPrice(product.regularPrice, product.currency)}
               </span>
             )
           }
           <span class="text-4xl font-bold text-stone-50">
-            {formatCLP(product.priceCLP)}
+            {formatPrice(product.price, product.currency)}
           </span>
         </div>
 
@@ -466,14 +466,14 @@ const barSignClass = (tone: string) =>
       <div class="leading-tight">
         <div class="flex items-baseline gap-2">
           {
-            product.regularPriceCLP && (
+            product.regularPrice && (
               <span class="text-xs text-stone-400 line-through">
-                {formatCLP(product.regularPriceCLP)}
+                {formatPrice(product.regularPrice, product.currency)}
               </span>
             )
           }
           <span class="text-lg font-bold text-stone-50">
-            {formatCLP(product.priceCLP)}
+            {formatPrice(product.price, product.currency)}
           </span>
         </div>
         <span class="text-[11px] text-stone-400">{content.stickyLabel}</span>
