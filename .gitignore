@@ -28,3 +28,6 @@ blob-uploads/
 .vercel
 .env.local
 .env.local
+
+# subagent-driven-development scratch (ledger, task briefs/reports, review diffs)
+.superpowers/
