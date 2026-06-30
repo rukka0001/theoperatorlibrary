@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { get } from '@vercel/blob';
+import { get, head } from '@vercel/blob';
 import { getProduct } from '../../config/products';
 import { verifyDownloadToken } from '../../lib/download-token';
 import { getEnv } from '../../lib/env';
@@ -65,8 +65,21 @@ export const GET: APIRoute = async ({ url }) => {
       'content-disposition': `attachment; filename="${file.fileName}"`,
       'cache-control': 'private, no-store'
     });
-    if (result.blob.size != null) {
-      headers.set('content-length', String(result.blob.size));
+
+    // `get` can report `blob.size === 0` for some objects (observed with .azw3 /
+    // application/octet-stream) even though the stream carries the full file.
+    // Setting `content-length: 0` truncates the download to 0 bytes, so fall back
+    // to head()'s authoritative size and NEVER send a zero length for a real file.
+    let size = result.blob.size;
+    if (!size) {
+      size = await head(file.blobKey, {
+        ...(blobToken ? { token: blobToken } : {})
+      })
+        .then((h) => h.size)
+        .catch(() => undefined);
+    }
+    if (size) {
+      headers.set('content-length', String(size));
     }
 
     return new Response(result.stream, { status: 200, headers });
