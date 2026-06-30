@@ -152,13 +152,21 @@ env values (+ live variant id if it differs). No code change.
 ### Provisioning status (test mode)
 - ✅ `LEMONSQUEEZY_API_KEY` — test-mode key saved to `.env`, authenticates (HTTP 200).
 - ✅ `LEMONSQUEEZY_STORE_ID = 421048` — store "The Operator Library", currency USD.
-- ⛔ **Variant ID** — store has 0 products. Chris must create the product
-  "Day Trading from Inside the Problem" with a **$18.99** variant (compare-at
-  $38.99) in the LS dashboard, then we read its variant id. (LS API cannot
-  create products.)
-- ⛔ `LEMONSQUEEZY_WEBHOOK_SECRET` — Chris must add a webhook (event
-  `order_created`) in the LS dashboard pointing at `/api/webhooks/lemonsqueezy`;
-  LS returns the signing secret to paste into `.env`.
+- ✅ **Variant ID `1853026`** (product `1184934`) — verified $18.99 (1899 cents),
+  product status `published`. Goes in product config `lemonSqueezy.variantId`.
+- ✅ `LEMONSQUEEZY_WEBHOOK_SECRET` — saved to `.env` (`order_created` webhook).
+- ⚠️ **Product name mismatch:** the LS product is still named "The Trader Who Was
+  Losing By Winning" — shows on the hosted checkout. Chris to rename it to
+  "Day Trading from Inside the Problem" in the dashboard (no code/variant-id impact).
+
+### Verified contract (2026-06-29)
+- ✅ `POST /v1/checkouts` with our exact payload (store/variant relationships,
+  `checkout_data.email` + `checkout_data.custom.slug`, `product_options.redirect_url`)
+  returns the hosted URL at **`data.attributes.url`**. Confirmed live against the
+  test store with variant `1853026`.
+- ⏳ `order_created` attribute names (`user_email`, `status`, `total`, `currency`)
+  to be confirmed during Task 9 E2E (requires a real test-card purchase); the
+  webhook parser uses LS's documented field names until then.
 
 ## Out of scope (YAGNI)
 
