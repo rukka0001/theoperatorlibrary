@@ -115,12 +115,12 @@ export const POST: APIRoute = async ({ request }) => {
       try {
         await sendOrderNotificationEmail({
           to: notifyTo,
-          productTitle: product.title,
+          product,
           buyerEmail: email,
           amount: payment.amount,
           currency: payment.raw?.currency ?? 'CLP',
-          commerceOrder: payment.commerceOrder,
-          flowStatus: 'PAID',
+          orderRef: payment.commerceOrder,
+          statusLabel: 'PAID',
           date: new Date()
         });
       } catch (notifyError) {

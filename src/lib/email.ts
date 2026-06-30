@@ -68,6 +68,75 @@ export interface DownloadEmailInput {
   ttlDays: number;
 }
 
+// ---------------------------------------------------------------------------
+// Language copy bundles
+// ---------------------------------------------------------------------------
+
+type Locale = 'es' | 'en';
+
+interface DownloadCopy {
+  htmlLang: string;
+  subject: (title: string) => string;
+  heading: string;
+  intro: (title: string) => string; // returns HTML (title injected, pre-escaped by caller)
+  filesLabel: string;
+  expiry: (days: number) => string;
+  support: (email: string) => string; // HTML
+  supportText: (email: string) => string;
+  disclaimer: string;
+  thanksText: string;
+  paidText: (title: string) => string;
+  expiryText: (days: number) => string;
+}
+
+const DOWNLOAD_COPY: Record<Locale, DownloadCopy> = {
+  es: {
+    htmlLang: 'es',
+    subject: (t) => `Tu descarga: ${t}`,
+    heading: '¡Gracias por tu compra!',
+    intro: (t) =>
+      `Tu pago fue confirmado. Aquí están tus descargas de <strong>${t}</strong>.`,
+    filesLabel: 'Tus archivos',
+    expiry: (d) => `Estos enlaces son personales y vencen en ${d} días.`,
+    support: (e) =>
+      `Si tienes algún problema con la descarga, responde a este correo o escríbenos a <a href="mailto:${e}" style="color:#b45309;text-decoration:underline;">${e}</a>.`,
+    supportText: (e) =>
+      `Si tienes algún problema con la descarga, responde a este correo o escríbenos a ${e}.`,
+    disclaimer:
+      'Solo para fines educativos. No es asesoramiento financiero. No incluye alertas ni señales. El trading conlleva riesgo de pérdida de capital.',
+    thanksText: '¡Gracias por tu compra!',
+    paidText: (t) =>
+      `Tu pago fue confirmado. Aquí están tus descargas de "${t}".`,
+    expiryText: (d) => `(Estos enlaces son personales y vencen en ${d} días.)`
+  },
+  en: {
+    htmlLang: 'en',
+    subject: (t) => `Your download: ${t}`,
+    heading: 'Thank you for your purchase!',
+    intro: (t) =>
+      `Your payment is confirmed. Here are your downloads for <strong>${t}</strong>.`,
+    filesLabel: 'Your files',
+    expiry: (d) => `These links are personal and expire in ${d} days.`,
+    support: (e) =>
+      `If you have any trouble downloading, reply to this email or write to us at <a href="mailto:${e}" style="color:#b45309;text-decoration:underline;">${e}</a>.`,
+    supportText: (e) =>
+      `If you have any trouble downloading, reply to this email or write to us at ${e}.`,
+    disclaimer:
+      'For educational purposes only. Not financial advice. Does not include alerts or signals. Trading carries the risk of capital loss.',
+    thanksText: 'Thank you for your purchase!',
+    paidText: (t) => `Your payment is confirmed. Here are your downloads for "${t}".`,
+    expiryText: (d) => `(These links are personal and expire in ${d} days.)`
+  }
+};
+
+function copyFor(language: string): DownloadCopy {
+  return DOWNLOAD_COPY[(language as Locale)] ?? DOWNLOAD_COPY.es;
+}
+
+// ---------------------------------------------------------------------------
+// Download email
+// ---------------------------------------------------------------------------
+
 /** Build the per-file download URL from the base (token) URL. */
 function fileUrl(baseUrl: string, fileId: string): string {
   const sep = baseUrl.includes('?') ? '&' : '?';
@@ -82,33 +151,38 @@ export async function sendDownloadEmail(
   input: DownloadEmailInput
 ): Promise<void> {
   const { to, product } = input;
+  const c = copyFor(product.language);
 
   await sendEmail({
     to,
-    subject: `Tu descarga: ${product.title}`,
-    html: renderHtml(input),
-    text: renderText(input),
+    subject: c.subject(product.title),
+    html: renderHtml(input, c),
+    text: renderText(input, c),
     // Replies (download problems, support) go to the support inbox, not the
     // no-reply delivery sender.
     replyTo: supportEmail
   });
 }
 
+// ---------------------------------------------------------------------------
+// Order notification email (provider-neutral)
+// ---------------------------------------------------------------------------
+
 export interface OrderNotificationInput {
   /** Internal recipient (ORDER_NOTIFICATION_EMAIL). */
   to: string;
-  /** Purchased product title. */
-  productTitle: string;
+  /** Purchased product. */
+  product: Product;
   /** Buyer email. */
   buyerEmail: string;
-  /** Amount paid (as reported by Flow). */
+  /** Amount paid, already formatted as a string (e.g. "18.99" or "14990"). */
   amount: string;
   /** Currency code (e.g. CLP). */
   currency: string;
-  /** Flow commerceOrder id. */
-  commerceOrder: string;
-  /** Flow payment status (human label, e.g. "PAID"). */
-  flowStatus: string;
+  /** Provider order reference (Flow commerceOrder or LS order id). */
+  orderRef: string;
+  /** Human status label, e.g. "PAID". */
+  statusLabel: string;
   /** When the sale was processed. */
   date: Date;
 }
@@ -124,7 +198,7 @@ export async function sendOrderNotificationEmail(
 ): Promise<void> {
   await sendEmail({
     to: input.to,
-    subject: 'Nueva venta: El Trader Que Perdía Ganando',
+    subject: `New sale: ${input.product.title}`,
     html: renderOrderNotificationHtml(input),
     text: renderOrderNotificationText(input)
   });
@@ -132,17 +206,17 @@ export async function sendOrderNotificationEmail(
 
 function renderOrderNotificationText(input: OrderNotificationInput): string {
   return [
-    `Nueva venta confirmada.`,
+    `New sale confirmed.`,
     ``,
-    `Producto: ${input.productTitle}`,
-    `Comprador: ${input.buyerEmail}`,
-    `Monto: ${input.amount} ${input.currency}`,
-    `Moneda: ${input.currency}`,
-    `commerceOrder: ${input.commerceOrder}`,
-    `Estado de pago (Flow): ${input.flowStatus}`,
-    `Fecha/hora: ${input.date.toISOString()}`,
+    `Product: ${input.product.title}`,
+    `Buyer: ${input.buyerEmail}`,
+    `Amount: ${input.amount} ${input.currency}`,
+    `Currency: ${input.currency}`,
+    `Order ref: ${input.orderRef}`,
+    `Status: ${input.statusLabel}`,
+    `Date/time: ${input.date.toISOString()}`,
     ``,
-    `El email de entrega fue enviado al comprador correctamente.`
+    `The delivery email was sent to the buyer successfully.`
   ].join('\n');
 }
 
@@ -154,7 +228,7 @@ function renderOrderNotificationHtml(input: OrderNotificationInput): string {
         </tr>`;
 
   return `<!doctype html>
-<html lang="es">
+<html lang="en">
   <body style="margin:0;padding:0;background:#0c0a09;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c0a09;padding:32px 16px;">
       <tr>
@@ -162,23 +236,23 @@ function renderOrderNotificationHtml(input: OrderNotificationInput): string {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;">
             <tr>
               <td style="background:#0c0a09;padding:20px 28px;">
-                <span style="color:#fafaf9;font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">The Operator Library — Nueva venta</span>
+                <span style="color:#fafaf9;font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">The Operator Library — New sale</span>
               </td>
             </tr>
             <tr>
               <td style="padding:28px 28px 8px;">
-                <h1 style="margin:0 0 16px;font-size:20px;color:#1c1917;">Venta confirmada</h1>
+                <h1 style="margin:0 0 16px;font-size:20px;color:#1c1917;">Sale confirmed</h1>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                  ${row('Producto', input.productTitle)}
-                  ${row('Comprador', input.buyerEmail)}
-                  ${row('Monto', `${input.amount} ${input.currency}`)}
-                  ${row('Moneda', input.currency)}
-                  ${row('commerceOrder', input.commerceOrder)}
-                  ${row('Estado de pago (Flow)', input.flowStatus)}
-                  ${row('Fecha/hora', input.date.toISOString())}
+                  ${row('Product', input.product.title)}
+                  ${row('Buyer', input.buyerEmail)}
+                  ${row('Amount', `${input.amount} ${input.currency}`)}
+                  ${row('Currency', input.currency)}
+                  ${row('Order ref', input.orderRef)}
+                  ${row('Status', input.statusLabel)}
+                  ${row('Date/time', input.date.toISOString())}
                 </table>
                 <p style="margin:20px 0 28px;font-size:13px;line-height:1.6;color:#16a34a;font-weight:600;">
-                  ✓ El email de entrega fue enviado al comprador correctamente.
+                  ✓ The delivery email was sent to the buyer successfully.
                 </p>
               </td>
             </tr>
@@ -190,28 +264,34 @@ function renderOrderNotificationHtml(input: OrderNotificationInput): string {
 </html>`;
 }
 
-function renderText({ product, downloadUrl, ttlDays }: DownloadEmailInput): string {
+// ---------------------------------------------------------------------------
+// Download email render helpers
+// ---------------------------------------------------------------------------
+
+function renderText(input: DownloadEmailInput, c: DownloadCopy): string {
+  const { product, downloadUrl, ttlDays } = input;
   const files = product.files
     .map((f) => `- ${f.label}: ${fileUrl(downloadUrl, f.id)}`)
     .join('\n');
 
   return [
-    `¡Gracias por tu compra!`,
+    c.thanksText,
     ``,
-    `Tu pago fue confirmado. Aquí están tus descargas de "${product.title}".`,
+    c.paidText(product.title),
     ``,
     files,
     ``,
-    `(Estos enlaces son personales y vencen en ${ttlDays} días.)`,
+    c.expiryText(ttlDays),
     ``,
-    `Si tienes algún problema con la descarga, responde a este correo o escríbenos a ${supportEmail}.`,
+    c.supportText(supportEmail),
     ``,
-    `Solo para fines educativos. No es asesoramiento financiero. No incluye alertas ni señales. El trading conlleva riesgo de pérdida de capital.`,
+    c.disclaimer,
     `The Operator Library`
   ].join('\n');
 }
 
-function renderHtml({ product, downloadUrl, ttlDays }: DownloadEmailInput): string {
+function renderHtml(input: DownloadEmailInput, c: DownloadCopy): string {
+  const { product, downloadUrl, ttlDays } = input;
   const rows = product.files
     .map(
       (f) => `
@@ -229,7 +309,7 @@ function renderHtml({ product, downloadUrl, ttlDays }: DownloadEmailInput): stri
     .join('');
 
   return `<!doctype html>
-<html lang="es">
+<html lang="${c.htmlLang}">
   <body style="margin:0;padding:0;background:#0c0a09;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c0a09;padding:32px 16px;">
       <tr>
@@ -242,32 +322,28 @@ function renderHtml({ product, downloadUrl, ttlDays }: DownloadEmailInput): stri
             </tr>
             <tr>
               <td style="padding:32px 28px 8px;">
-                <h1 style="margin:0 0 12px;font-size:22px;color:#1c1917;">¡Gracias por tu compra!</h1>
+                <h1 style="margin:0 0 12px;font-size:22px;color:#1c1917;">${escapeHtml(c.heading)}</h1>
                 <p style="margin:0;font-size:15px;line-height:1.6;color:#44403c;">
-                  Tu pago fue confirmado. Aquí están tus descargas de
-                  <strong>${escapeHtml(product.title)}</strong>.
+                  ${c.intro(escapeHtml(product.title))}
                 </p>
               </td>
             </tr>
             <tr>
               <td style="padding:20px 28px 8px;">
-                <p style="margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#78716c;">Tus archivos</p>
+                <p style="margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#78716c;">${escapeHtml(c.filesLabel)}</p>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
                 <p style="margin:16px 0 0;font-size:13px;color:#a8a29e;">
-                  Estos enlaces son personales y vencen en ${ttlDays} días.
+                  ${escapeHtml(c.expiry(ttlDays))}
                 </p>
                 <p style="margin:12px 0 0;font-size:13px;line-height:1.6;color:#78716c;">
-                  Si tienes algún problema con la descarga, responde a este correo
-                  o escríbenos a
-                  <a href="mailto:${supportEmail}" style="color:#b45309;text-decoration:underline;">${supportEmail}</a>.
+                  ${c.support(supportEmail)}
                 </p>
               </td>
             </tr>
             <tr>
               <td style="padding:16px 28px 28px;border-top:1px solid #e7e5e4;">
                 <p style="margin:0;font-size:11px;line-height:1.6;color:#a8a29e;">
-                  Solo para fines educativos. No es asesoramiento financiero. No incluye
-                  alertas ni señales. El trading conlleva riesgo de pérdida de capital.
+                  ${escapeHtml(c.disclaimer)}
                 </p>
               </td>
             </tr>
