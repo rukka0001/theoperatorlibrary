@@ -2,7 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { listProducts, formatPrice } from '../../config/products';
 
-const products = listProducts();
+// The Spanish storefront lists Spanish products only. This keeps the English
+// (Lemon Squeezy) book out of the catalog until it has its own storefront.
+const products = listProducts().filter((product) => product.language === 'es');
 ---
 
 <BaseLayout
