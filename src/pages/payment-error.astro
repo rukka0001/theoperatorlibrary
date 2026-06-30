@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supportEmail } from '../config/business';
+---
+
+<BaseLayout
+  title="There was a problem with your payment — The Operator Library"
+  description="We could not process your payment."
+  lang="en"
+>
+  <section class="mx-auto max-w-xl px-6 py-24 text-center">
+    <div
+      class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-500/15 text-2xl text-red-400"
+      aria-hidden="true"
+    >
+      !
+    </div>
+    <h1 class="mt-6 text-3xl font-semibold text-stone-50">Payment not completed</h1>
+    <p class="mt-4 text-lg text-stone-400">
+      Your payment could not be processed or was cancelled. No charge was made.
+      You can try again whenever you like.
+    </p>
+    <div class="mt-10 flex flex-wrap justify-center gap-3">
+      <a
+        href="/en/day-trading-from-inside-the-problem"
+        class="rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
+      >
+        Try again
+      </a>
+      <a
+        href={`mailto:${supportEmail}`}
+        class="rounded-lg border border-stone-700 px-5 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/60 hover:text-amber-300"
+      >
+        I need help
+      </a>
+    </div>
+  </section>
+</BaseLayout>
