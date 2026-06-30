@@ -1,0 +1,33 @@
+/* PDF-ONLY premium overrides, applied via Calibre `--extra-css` when converting
+ * the EPUB to PDF. These intentionally do NOT ship inside the EPUB/AZW3 (which
+ * stay clean and reflowable via book.css). Uses !important to win over book.css
+ * during the PDF render.
+ */
+
+/* No blue / underlined links anywhere, including the printed table of contents. */
+a, a:link, a:visited { color: #1c1917 !important; text-decoration: none !important; }
+nav a, .toc a, ol.toc a { color: #1c1917 !important; text-decoration: none !important; }
+
+/* Print typography: generous leading + justified body. */
+body { line-height: 1.6 !important; }
+p { text-align: justify !important; }
+
+/* Larger headings for the print page. */
+h1 { font-size: 1.95em !important; }
+h2 { font-size: 1.55em !important; }
+h3 { color: #78716c !important; letter-spacing: 0.06em !important; }
+
+/* Premium part-divider pages: push the title down the page (print only). */
+h1.part {
+  margin-top: 28% !important;
+  font-size: 2.1em !important;
+  border-top-width: 3px !important;
+  border-bottom-width: 3px !important;
+  padding: 0.55em 0 !important;
+}
+
+/* Title page sits a little lower on the printed page. */
+section.titlepage { margin-top: 10% !important; }
+
+/* Charts a touch inset from the print margins. */
+div.chart img { max-width: 86% !important; }

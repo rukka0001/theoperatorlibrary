@@ -46,6 +46,7 @@ export interface Product {
 
 const ES_BLOB_PREFIX = 'books/el-trader-que-perdia-ganando/es';
 const EN_BLOB_PREFIX = 'books/day-trading-from-inside-the-problem/en';
+const CL_BLOB_PREFIX = 'books/como-hacer-trading-desde-chile/es';
 
 export const products: Record<string, Product> = {
   'el-trader-que-perdia-ganando': {
@@ -91,6 +92,53 @@ export const products: Record<string, Product> = {
         ctaLabel: 'Descargar hojas de referencia',
         fileName: 'Hojas-de-Referencia.pdf',
         blobKey: `${ES_BLOB_PREFIX}/hojas-de-referencia.pdf`,
+        contentType: 'application/pdf'
+      }
+    ]
+  },
+  'como-hacer-trading-desde-chile': {
+    slug: 'como-hacer-trading-desde-chile',
+    title: 'Cómo hacer trading desde Chile',
+    subtitle:
+      'La guía práctica para empezar a operar mercados internacionales — y evitar los errores que casi destruyeron mi cuenta.',
+    author: 'Chris Ruzicka',
+    language: 'es',
+    provider: 'flow',
+    currency: 'CLP',
+    price: 14990,
+    regularPrice: 29990,
+    coverImage: '/images/books/como-hacer-trading-desde-chile/cover_new.png',
+    files: [
+      {
+        id: 'pdf',
+        label: 'Ebook principal (PDF)',
+        ctaLabel: 'Descargar PDF',
+        fileName: 'Como-Hacer-Trading-Desde-Chile.pdf',
+        blobKey: `${CL_BLOB_PREFIX}/como-hacer-trading-desde-chile.pdf`,
+        contentType: 'application/pdf'
+      },
+      {
+        id: 'epub',
+        label: 'Versión EPUB',
+        ctaLabel: 'Descargar EPUB',
+        fileName: 'Como-Hacer-Trading-Desde-Chile.epub',
+        blobKey: `${CL_BLOB_PREFIX}/como-hacer-trading-desde-chile.epub`,
+        contentType: 'application/epub+zip'
+      },
+      {
+        id: 'azw3',
+        label: 'Versión Kindle / AZW3',
+        ctaLabel: 'Descargar Kindle / AZW3',
+        fileName: 'Como-Hacer-Trading-Desde-Chile.azw3',
+        blobKey: `${CL_BLOB_PREFIX}/como-hacer-trading-desde-chile.azw3`,
+        contentType: 'application/octet-stream'
+      },
+      {
+        id: 'hojas',
+        label: 'Hojas de referencia (4 incluidas)',
+        ctaLabel: 'Descargar hojas de referencia',
+        fileName: 'Hojas-de-Referencia.pdf',
+        blobKey: `${CL_BLOB_PREFIX}/hojas-de-referencia.pdf`,
         contentType: 'application/pdf'
       }
     ]

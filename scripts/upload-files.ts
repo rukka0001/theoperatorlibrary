@@ -23,6 +23,13 @@ import path from 'node:path';
 import { put } from '@vercel/blob';
 import { listProducts } from '../src/config/products.ts';
 
+/**
+ * Products whose Blob objects may be overwritten on upload. Keep this tight:
+ * a slug is added here only when we intentionally re-publish updated files for
+ * it. Everything not listed keeps the default no-overwrite protection.
+ */
+const OVERWRITE_SLUGS = new Set<string>(['como-hacer-trading-desde-chile']);
+
 interface Args {
   dir: string;
   dryRun: boolean;
@@ -84,10 +91,16 @@ async function main(): Promise<void> {
 
       try {
         const body = await readFile(localPath);
+        // Overwrite is scoped to a per-product allowlist so re-uploading an
+        // updated product can replace its own Blob objects, while every other
+        // product keeps the default no-overwrite guard that protects its
+        // already-published files from being clobbered.
+        const allowOverwrite = OVERWRITE_SLUGS.has(product.slug);
         const result = await put(file.blobKey, body, {
           access: 'private',
           addRandomSuffix: false,
           contentType: file.contentType,
+          allowOverwrite,
           token
         });
         console.log(`  ✓ ${file.blobKey}`);

@@ -1,0 +1,9 @@
+---
+import BookPage from '../../components/book-page/BookPage.astro';
+import { getProduct } from '../../config/products';
+import { content } from '../../content/books/como-hacer-trading-desde-chile';
+
+const product = getProduct('como-hacer-trading-desde-chile')!;
+---
+
+<BookPage product={product} content={content} />
