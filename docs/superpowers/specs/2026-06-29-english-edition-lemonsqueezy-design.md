@@ -5,10 +5,14 @@
 
 ## Goal
 
-Launch the English edition of *El Trader Que Perdía Ganando* — **"The Trader Who
-Was Losing By Winning"** — at `/en/the-trader-who-was-losing-by-winning`, reusing
-the existing delivery loop (signed download token → Vercel Blob → Resend email)
-but replacing the Flow (CLP) payment gateway with **Lemon Squeezy** (USD).
+Launch the English edition of *El Trader Que Perdía Ganando* — titled
+**"Day Trading from Inside the Problem"** — at `/en/day-trading-from-inside-the-problem`,
+reusing the existing delivery loop (signed download token → Vercel Blob → Resend
+email) but replacing the Flow (CLP) payment gateway with **Lemon Squeezy** (USD).
+
+**Title:** Day Trading from Inside the Problem
+**Subtitle:** How you can win most of your trades and still lose money — and how to
+start building a system that protects your account.
 
 The live Spanish/Flow flow is not modified in behavior. Lemon Squeezy is approved,
 so development runs in **test mode** and goes live via an env swap (no code change).
@@ -17,7 +21,7 @@ so development runs in **test mode** and goes live via an env swap (no code chan
 
 | Decision | Value |
 |---|---|
-| English slug / URL | `the-trader-who-was-losing-by-winning` → `/en/...` |
+| English slug / URL | `day-trading-from-inside-the-problem` → `/en/...` |
 | Pricing | **$18.99 launch / $38.99 regular** (USD); must match the LS variant price |
 | Payment provider | Lemon Squeezy (test mode in dev, live via env) |
 | Checkout method | API-created checkout (mirrors the Flow server→redirect pattern) |
@@ -35,8 +39,8 @@ so development runs in **test mode** and goes live via an env swap (no code chan
 
 | Concern | File | New/Changed |
 |---|---|---|
-| Page | `src/pages/en/the-trader-who-was-losing-by-winning.astro` | new |
-| Copy | `src/content/books/the-trader-who-was-losing-by-winning/{index,copy,sections,faq}.ts` | new (translated) |
+| Page | `src/pages/en/day-trading-from-inside-the-problem.astro` | new |
+| Copy | `src/content/books/day-trading-from-inside-the-problem/{index,copy,sections,faq}.ts` | new (translated) |
 | Thank-you | `src/pages/thank-you.astro` | new (English `/gracias`, Meta Pixel Purchase in USD) |
 | Error | `src/pages/payment-error.astro` | new (English `/error-pago`) |
 | LS client | `src/lib/lemonsqueezy.ts` | new |
@@ -47,7 +51,7 @@ so development runs in **test mode** and goes live via an env swap (no code chan
 | Buy form | `src/components/book-page/BuyForm.astro` | changed (provider-driven action, i18n labels) |
 | Book page | `src/components/book-page/BookPage.astro` | changed (pass provider; use formatPrice) |
 | Layout | `src/layouts/BaseLayout.astro` | changed (lang per page) |
-| Blob staging | `blob-uploads/books/the-trader-who-was-losing-by-winning/en/` | created (4 files dropped here) |
+| Blob staging | `blob-uploads/books/day-trading-from-inside-the-problem/en/` | created (4 files dropped here) |
 | Env example | `.env.example` | changed (LS vars) |
 
 ## Product config (generalization)
@@ -67,7 +71,7 @@ For **Lemon Squeezy**, the LS **variant price is authoritative** (LS charges it)
 `price`/`regularPrice` are display-only and must match the variant ($18.99 / $38.99).
 
 English product entry (USD, provider `lemonsqueezy`, files under
-`books/the-trader-who-was-losing-by-winning/en/`): `the-trader-who-was-losing-by-winning.pdf`,
+`books/day-trading-from-inside-the-problem/en/`): `day-trading-from-inside-the-problem.pdf`,
 `.epub`, `.azw3`, `reference-sheets.pdf`.
 
 ## Lemon Squeezy data flow
@@ -129,7 +133,7 @@ template **structure stays shared**. English bundle covers:
 
 ## Content translation
 
-New `src/content/books/the-trader-who-was-losing-by-winning/` mirroring the
+New `src/content/books/day-trading-from-inside-the-problem/` mirroring the
 Spanish structure (`index.ts`, `copy.ts`, `sections.ts`, `faq.ts`) — full English
 translation of hero, included items, why, problem (stats/bars), bonuses, audience,
 coverage, preview, FAQ, finalCta, stickyLabel. Authored for review.
@@ -144,6 +148,17 @@ coverage, preview, FAQ, finalCta, stickyLabel. Authored for review.
 
 Variant id lives in product config (non-secret). Test→live cutover = swap these
 env values (+ live variant id if it differs). No code change.
+
+### Provisioning status (test mode)
+- ✅ `LEMONSQUEEZY_API_KEY` — test-mode key saved to `.env`, authenticates (HTTP 200).
+- ✅ `LEMONSQUEEZY_STORE_ID = 421048` — store "The Operator Library", currency USD.
+- ⛔ **Variant ID** — store has 0 products. Chris must create the product
+  "Day Trading from Inside the Problem" with a **$18.99** variant (compare-at
+  $38.99) in the LS dashboard, then we read its variant id. (LS API cannot
+  create products.)
+- ⛔ `LEMONSQUEEZY_WEBHOOK_SECRET` — Chris must add a webhook (event
+  `order_created`) in the LS dashboard pointing at `/api/webhooks/lemonsqueezy`;
+  LS returns the signing secret to paste into `.env`.
 
 ## Out of scope (YAGNI)
 
