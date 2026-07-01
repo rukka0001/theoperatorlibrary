@@ -39,7 +39,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       scheduled: result.scheduled,
       audienceAdded: result.audienceAdded
     });
-    return redirect('/es/guia-enviada', 303);
+    // ?signup=1 marks a genuine post-opt-in arrival so the confirmation page
+    // fires the Meta "Lead" pixel event only for real signups (not direct hits).
+    return redirect('/es/guia-enviada?signup=1', 303);
   } catch (error) {
     console.error('[leads/subscribe] failed:', error);
     return redirect(`${optInPath}?error=1`, 303);

@@ -46,9 +46,14 @@ import { supportEmail } from '../../config/business';
     </p>
   </section>
 
-  <!-- Meta Pixel: Lead conversion (fires once the page loads) -->
+  <!-- Meta Pixel: Lead conversion. Fires ONLY when arriving from a genuine
+       opt-in (subscribe redirects here with ?signup=1), so direct or bookmarked
+       visits to this page don't inflate the Lead count. -->
   <script is:inline>
-    if (typeof fbq === 'function') {
+    if (
+      typeof fbq === 'function' &&
+      new URLSearchParams(window.location.search).has('signup')
+    ) {
       fbq('track', 'Lead', { content_name: 'guia_gratis_trading_chile' });
     }
   </script>
