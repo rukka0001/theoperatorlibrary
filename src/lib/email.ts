@@ -87,6 +87,44 @@ export async function addAudienceContact(email: string): Promise<void> {
   }
 }
 
+export interface AudienceContact {
+  email: string;
+  /** ISO 8601 creation timestamp from Resend. */
+  createdAt: string;
+}
+
+/**
+ * List all contacts in the configured Resend Audience, following cursor
+ * pagination. Returns [] if RESEND_AUDIENCE_ID is unset. Used by the daily lead
+ * digest. Caps iterations defensively so a bad cursor can't loop forever.
+ */
+export async function listAudienceContacts(): Promise<AudienceContact[]> {
+  const audienceId = getEnv('RESEND_AUDIENCE_ID');
+  if (!audienceId) return [];
+
+  const client = getClient();
+  const out: AudienceContact[] = [];
+  let after: string | undefined;
+
+  for (let page = 0; page < 100; page++) {
+    const { data, error } = await client.contacts.list({
+      audienceId,
+      limit: 100,
+      ...(after ? { after } : {})
+    });
+    if (error) {
+      throw new Error(`Resend failed to list contacts: ${error.message}`);
+    }
+    const rows = data?.data ?? [];
+    for (const c of rows) out.push({ email: c.email, createdAt: c.created_at });
+
+    if (!data?.has_more || rows.length === 0) break;
+    after = rows[rows.length - 1]?.id;
+    if (!after) break;
+  }
+  return out;
+}
+
 export interface DownloadEmailInput {
   to: string;
   product: Product;
