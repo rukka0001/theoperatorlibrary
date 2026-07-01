@@ -1,0 +1,113 @@
+/* Reflowable ebook styling for "Cómo hacer trading desde Chile" (EPUB/AZW3).
+ *
+ * Kept deliberately minimal and reflow-safe so reader apps (Apple Books,
+ * Kindle) control page margins and font size. NO fixed widths, NO percentage
+ * vertical margins, NO justified text, NO page-like positioning.
+ *
+ * The PDF's premium print look is layered on separately at conversion time via
+ * print-extra.css (Calibre --extra-css); it is NOT in this file.
+ */
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.5;
+  color: #1c1917;
+}
+
+a, a:link, a:visited { color: #1c1917; text-decoration: none; }
+
+/* Body text flows naturally; reader app controls margins. Left-aligned (not
+   justified) so narrow columns never get ugly inter-word gaps. */
+p { margin: 0 0 0.9em; text-indent: 0; }
+
+h1, h2, h3 {
+  color: #1c1917;
+  line-height: 1.25;
+  page-break-after: avoid;
+}
+
+/* Parts and front/back matter. Chapter-level break, normal margins. */
+h1 {
+  font-size: 1.7em;
+  font-weight: 700;
+  margin: 0.2em 0 0.8em;
+  page-break-before: always;
+}
+
+/* Chapter openers. */
+h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin: 0.2em 0 0.8em;
+  page-break-before: always;
+}
+
+/* In-chapter subheads. */
+h3 {
+  font-size: 1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #57534e;
+  margin: 1.4em 0 0.4em;
+}
+
+/* Part divider: simple centered band, no large margins. */
+h1.part {
+  text-align: center;
+  color: #b45309;
+  border-top: 2px solid #b45309;
+  border-bottom: 2px solid #b45309;
+  padding: 0.5em 0;
+  margin: 0.4em 0 0.8em;
+}
+
+/* Pandoc metadata title page. */
+section.titlepage { text-align: center; }
+section.titlepage .subtitle { font-style: italic; }
+section.titlepage .author { font-weight: 700; }
+
+blockquote {
+  color: #44403c;
+  border-left: 3px solid #d6d3d1;
+  padding-left: 0.9em;
+  margin: 1em 0;
+  font-style: italic;
+}
+
+ul, ol { margin: 0 0 0.9em 1.2em; }
+li { margin-bottom: 0.3em; }
+
+strong { color: #1c1917; }
+
+hr { border: 0; border-top: 1px solid #e7e5e4; margin: 1.4em 0; }
+
+/* Callout boxes — reflow-safe (no fixed width). */
+div.takeaway, div.try, div.note {
+  padding: 0.7em 0.9em;
+  margin: 1.2em 0;
+  border-radius: 5px;
+  page-break-inside: avoid;
+}
+div.takeaway { background: #fef3c7; border-left: 4px solid #f59e0b; }
+div.try      { background: #ecfdf5; border-left: 4px solid #10b981; }
+div.note     { background: #f5f5f4; border-left: 4px solid #a8a29e; }
+div.takeaway p, div.try p, div.note p { margin: 0.35em 0; }
+div.takeaway p:first-child, div.try p:first-child, div.note p:first-child { margin-top: 0; }
+div.takeaway p:last-child, div.try p:last-child, div.note p:last-child { margin-bottom: 0; }
+
+/* Charts — responsive, centered, caption below. */
+div.chart, figure {
+  margin: 1.2em 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+img { max-width: 100%; height: auto; }
+div.chart img { border: 1px solid #d6d3d1; }
+div.chart p, figure figcaption {
+  text-align: left;
+  font-size: 0.95em;
+  line-height: 1.45;
+  color: #44403c;
+  margin: 0.5em 0 0;
+}

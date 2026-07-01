@@ -11,7 +11,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "upload-files": "node --env-file-if-exists=.env scripts/upload-files.ts"
+    "upload-files": "node --env-file-if-exists=.env scripts/upload-files.ts",
+    "send:test-lead-emails": "node --env-file-if-exists=.env node_modules/vite-node/vite-node.mjs scripts/send-test-lead-emails.ts",
+    "setup:lead-audience": "node --env-file-if-exists=.env node_modules/vite-node/vite-node.mjs scripts/setup-lead-audience.ts"
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.0",

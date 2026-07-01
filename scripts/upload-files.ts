@@ -22,6 +22,7 @@ import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { put } from '@vercel/blob';
 import { listProducts } from '../src/config/products.ts';
+import { listLeadMagnets } from '../src/config/lead-magnets.ts';
 
 /**
  * Products whose Blob objects may be overwritten on upload. Keep this tight:
@@ -30,20 +31,31 @@ import { listProducts } from '../src/config/products.ts';
  */
 const OVERWRITE_SLUGS = new Set<string>(['como-hacer-trading-desde-chile']);
 
+/**
+ * Lead-magnet slugs whose Blob objects may be overwritten. The free guide is
+ * regenerated as its copy is tuned, so allow re-publishing it.
+ */
+const OVERWRITE_MAGNET_SLUGS = new Set<string>([
+  'como-empezar-trading-desde-chile'
+]);
+
 interface Args {
   dir: string;
   dryRun: boolean;
+  leadMagnetsOnly: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
   let dir = 'blob-uploads';
   let dryRun = false;
+  let leadMagnetsOnly = false;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--dir') dir = argv[++i] ?? dir;
     else if (arg === '--dry-run') dryRun = true;
+    else if (arg === '--lead-magnets-only') leadMagnetsOnly = true;
   }
-  return { dir: path.resolve(process.cwd(), dir), dryRun };
+  return { dir: path.resolve(process.cwd(), dir), dryRun, leadMagnetsOnly };
 }
 
 async function exists(filePath: string): Promise<boolean> {
@@ -56,7 +68,7 @@ async function exists(filePath: string): Promise<boolean> {
 }
 
 async function main(): Promise<void> {
-  const { dir, dryRun } = parseArgs(process.argv.slice(2));
+  const { dir, dryRun, leadMagnetsOnly } = parseArgs(process.argv.slice(2));
 
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token && !dryRun) {
@@ -73,7 +85,7 @@ async function main(): Promise<void> {
   let skipped = 0;
   let failed = 0;
 
-  for (const product of listProducts()) {
+  for (const product of leadMagnetsOnly ? [] : listProducts()) {
     console.log(`▸ ${product.title}`);
     for (const file of product.files) {
       const localPath = path.join(dir, file.blobKey);
@@ -112,6 +124,42 @@ async function main(): Promise<void> {
         );
         failed++;
       }
+    }
+  }
+
+  // Lead magnets (free giveaway PDFs). Same source-dir-mirrors-blobKey rule as
+  // products; each magnet has a single deliverable file.
+  for (const magnet of listLeadMagnets()) {
+    console.log(`▸ [lead magnet] ${magnet.title}`);
+    const file = magnet.file;
+    const localPath = path.join(dir, file.blobKey);
+
+    if (!(await exists(localPath))) {
+      console.warn(`  ⚠ missing: ${path.relative(process.cwd(), localPath)}`);
+      skipped++;
+      continue;
+    }
+
+    if (dryRun) {
+      console.log(`  • would upload ${file.blobKey} (${file.contentType})`);
+      continue;
+    }
+
+    try {
+      const body = await readFile(localPath);
+      const result = await put(file.blobKey, body, {
+        access: 'private',
+        addRandomSuffix: false,
+        contentType: file.contentType,
+        allowOverwrite: OVERWRITE_MAGNET_SLUGS.has(magnet.slug),
+        token
+      });
+      console.log(`  ✓ ${file.blobKey}`);
+      console.log(`      ${result.url}`);
+      uploaded++;
+    } catch (error) {
+      console.error(`  ✗ failed ${file.blobKey}: ${(error as Error).message}`);
+      failed++;
     }
   }
 

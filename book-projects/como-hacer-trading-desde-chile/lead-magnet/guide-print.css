@@ -1,0 +1,50 @@
+/* PDF-ONLY overrides for the FREE lead-magnet guide, applied via Calibre
+ * `--extra-css` when converting the EPUB to PDF. Kept SEPARATE from the paid
+ * book's print-extra.css so polishing the guide never changes the paid book.
+ * Uses !important to win over guide.css during the PDF render.
+ */
+
+/* Links: never the default blue/underline. Body links use the brand amber so
+ * the end-of-guide CTA reads as a link; the table of contents stays plain. */
+a, a:link, a:visited { color: #b45309 !important; text-decoration: none !important; }
+
+/* Table of contents: pandoc emits it as an ordered list, whose auto markers
+ * (1. 2. 3.) collided with the manual section numbers baked into the headings
+ * ("2. 1. Qué significa…"). Drop the list markers so ONLY the heading text
+ * shows: "Antes de empezar / 1. Qué significa… / … / Empezar es la parte fácil".
+ * TOC links render plain black, not amber. */
+nav, nav ol, nav ul, #toc, #toc ol, .toc, ol.toc, ul.toc {
+  list-style: none !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+nav li, #toc li, .toc li { list-style: none !important; margin: 0.28em 0 !important; }
+nav a, #toc a, .toc a, ol.toc a {
+  color: #1c1917 !important;
+  text-decoration: none !important;
+}
+
+/* Section separators (`---`) are redundant in the PDF because every section
+ * already starts on a fresh page (h1 page-break-before). Left in, a trailing
+ * <hr> could spill alone onto an otherwise empty page (the blank pages ~6/~16).
+ * Hide it in print so no stray blank pages are produced. */
+hr { display: none !important; }
+
+/* Print typography: generous leading + justified body. */
+body { line-height: 1.6 !important; }
+p { text-align: justify !important; }
+
+/* Larger headings for the print page. */
+h1 { font-size: 1.95em !important; }
+h2 { font-size: 1.55em !important; }
+h3 { color: #78716c !important; letter-spacing: 0.06em !important; }
+
+/* The end-of-guide soft CTA to the paid book: subtle boxed callout. */
+.cta, div.cta, p.cta {
+  background: #fef3c7 !important;
+  border-left: 4px solid #f59e0b !important;
+  padding: 0.8em 1em !important;
+  margin: 1.4em 0 !important;
+  text-align: left !important;
+  page-break-inside: avoid !important;
+}

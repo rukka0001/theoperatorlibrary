@@ -6,7 +6,7 @@
  * key is absent (e.g. during build).
  */
 import { Resend } from 'resend';
-import { requireEnv } from './env';
+import { requireEnv, getEnv } from './env';
 import { supportEmail } from '../config/business';
 import type { Product } from '../config/products';
 
@@ -30,6 +30,13 @@ export interface SendEmailInput {
   from?: string;
   /** Optional reply-to address. */
   replyTo?: string;
+  /**
+   * Optional ISO 8601 timestamp (or Resend natural-language string) to schedule
+   * the send for later. Used by the lead nurture sequence to fan out follow-ups
+   * at signup time. Resend allows scheduling up to 30 days ahead. Omit to send
+   * immediately.
+   */
+  scheduledAt?: string;
 }
 
 /**
@@ -47,7 +54,8 @@ export async function sendEmail(input: SendEmailInput): Promise<string> {
     subject: input.subject,
     html: input.html,
     text: input.text,
-    replyTo: input.replyTo
+    replyTo: input.replyTo,
+    ...(input.scheduledAt ? { scheduledAt: input.scheduledAt } : {})
   });
 
   if (error) {
@@ -57,6 +65,26 @@ export async function sendEmail(input: SendEmailInput): Promise<string> {
   }
 
   return data?.id ?? '';
+}
+
+/**
+ * Add a subscriber to the Resend Audience (the marketing list), if one is
+ * configured. Best-effort by design: if RESEND_AUDIENCE_ID is unset we skip
+ * silently so lead capture still works (the guide is still delivered). Throws
+ * only on an actual Resend API error, which the caller may choose to swallow.
+ */
+export async function addAudienceContact(email: string): Promise<void> {
+  const audienceId = getEnv('RESEND_AUDIENCE_ID');
+  if (!audienceId) return;
+
+  const { error } = await getClient().contacts.create({
+    audienceId,
+    email,
+    unsubscribed: false
+  });
+  if (error) {
+    throw new Error(`Resend failed to add contact ${email}: ${error.message}`);
+  }
 }
 
 export interface DownloadEmailInput {
